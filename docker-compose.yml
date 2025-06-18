@@ -1,0 +1,10 @@
+services:
+  postgres:
+    image: postgres:16.9
+    container_name: postgres
+    environment:
+      POSTGRES_DB: tsm_atelier_local_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+    ports:
+      - "5432:5432"
