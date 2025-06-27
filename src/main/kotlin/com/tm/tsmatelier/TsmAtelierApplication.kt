@@ -1,4 +1,4 @@
-package com.tm.tsm_atelier
+package com.tm.tsmatelier
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class TsmAtelierApplication
 
 fun main(args: Array<String>) {
-	runApplication<TsmAtelierApplication>(*args)
+    runApplication<TsmAtelierApplication>(*args)
 }
