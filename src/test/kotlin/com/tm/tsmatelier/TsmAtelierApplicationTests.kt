@@ -1,4 +1,4 @@
-package com.tm.tsm_atelier
+package com.tm.tsmatelier
 
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
