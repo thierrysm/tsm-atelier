@@ -1,5 +1,6 @@
 package com.tm.tsmatelier.core.entity
 
+import com.tm.tsmatelier.common.SecurityConstant
 import com.tm.tsmatelier.core.entity.enums.Role
 import jakarta.persistence.CascadeType
 import jakarta.persistence.CollectionTable
@@ -24,7 +25,7 @@ class UserEntity(
     var email: String,
     @Column(nullable = false)
     var password: String,
-    @Column(nullable = false, length = 15)
+    @Column(nullable = false, length = 11)
     var phone: String,
     @Enumerated(EnumType.STRING)
     @ElementCollection(fetch = FetchType.EAGER)
@@ -33,7 +34,7 @@ class UserEntity(
         joinColumns = [JoinColumn(name = "user_id")],
     )
     @Column(name = "role")
-    var roles: MutableSet<Role> = mutableSetOf(Role.CUSTOMER),
+    var roles: MutableSet<Role> = mutableSetOf(SecurityConstant.DEFAULT_ROLE),
     @OneToMany(mappedBy = "user", cascade = [CascadeType.ALL], orphanRemoval = true)
     var addresses: MutableList<AddressEntity> = mutableListOf(),
 ) : AuditableEntity()
