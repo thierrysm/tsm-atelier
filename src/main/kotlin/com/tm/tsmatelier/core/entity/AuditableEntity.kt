@@ -18,7 +18,7 @@ import java.util.UUID
 abstract class AuditableEntity : Serializable {
     @Id
     @GeneratedValue
-    @Column(updatable = false)
+    @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null
 
     @CreatedDate
