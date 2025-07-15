@@ -20,7 +20,8 @@ class JwtService(
         val authorities = authentication.authorities.map { it.authority }.toSet()
 
         val claims =
-            JwtClaimsSet.builder()
+            JwtClaimsSet
+                .builder()
                 .issuer(jwtConfigurationProperties.issuer)
                 .issuedAt(now)
                 .expiresAt(expirationTime)

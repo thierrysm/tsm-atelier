@@ -8,9 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails
 class AuthenticatedUser(
     val user: UserEntity,
 ) : UserDetails {
-    override fun getAuthorities(): Collection<GrantedAuthority> {
-        return user.roles.map { role -> SimpleGrantedAuthority(role.name) }.toSet()
-    }
+    override fun getAuthorities(): Collection<GrantedAuthority> = user.roles.map { role -> SimpleGrantedAuthority(role.name) }.toSet()
 
     override fun getPassword(): String = user.password
 

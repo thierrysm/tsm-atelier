@@ -16,9 +16,7 @@ class TestSecurityController {
      * Qualquer pessoa, autenticada ou não, pode acessar.
      */
     @GetMapping("/public")
-    fun getPublicResource(): ResponseEntity<String> {
-        return ResponseEntity.ok("Este é um endpoint público e acessível a todos!")
-    }
+    fun getPublicResource(): ResponseEntity<String> = ResponseEntity.ok("Este é um endpoint público e acessível a todos!")
 
     /**
      * Endpoint 2: Protegido para usuários com a role 'CUSTOMER'.
@@ -29,9 +27,7 @@ class TestSecurityController {
     @PreAuthorize("hasAuthority('CUSTOMER')")
     fun getUserResource(
         @AuthenticationPrincipal userDetails: UserDetails,
-    ): ResponseEntity<String> {
-        return ResponseEntity.ok("Olá, ${userDetails.username}! Você tem acesso ao recurso de USUÁRIO.")
-    }
+    ): ResponseEntity<String> = ResponseEntity.ok("Olá, ${userDetails.username}! Você tem acesso ao recurso de USUÁRIO.")
 
     /**
      * Endpoint 3: Protegido para usuários com a role 'ADMIN'.
@@ -41,7 +37,5 @@ class TestSecurityController {
     @PreAuthorize("hasAuthority('ADMIN')")
     fun getAdminResource(
         @AuthenticationPrincipal userDetails: UserDetails,
-    ): ResponseEntity<String> {
-        return ResponseEntity.ok("Olá, admin ${userDetails.username}! Você tem acesso ao recurso de ADMINISTRADOR.")
-    }
+    ): ResponseEntity<String> = ResponseEntity.ok("Olá, admin ${userDetails.username}! Você tem acesso ao recurso de ADMINISTRADOR.")
 }

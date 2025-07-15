@@ -36,19 +36,19 @@ class SecurityConfig(
             .exceptionHandling { it.authenticationEntryPoint(customAuthenticationEntryPoint) }
             .authorizeHttpRequests { auth ->
                 auth
-                    .requestMatchers(HttpMethod.GET, *allowedPaths.get.toTypedArray()).permitAll()
-                    .requestMatchers(HttpMethod.POST, *allowedPaths.post.toTypedArray()).permitAll()
-                    .anyRequest().authenticated()
-            }
-            .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
+                    .requestMatchers(HttpMethod.GET, *allowedPaths.get.toTypedArray())
+                    .permitAll()
+                    .requestMatchers(HttpMethod.POST, *allowedPaths.post.toTypedArray())
+                    .permitAll()
+                    .anyRequest()
+                    .authenticated()
+            }.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter::class.java)
 
         return http.build()
     }
 
     @Bean
-    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager {
-        return config.authenticationManager
-    }
+    fun authenticationManager(config: AuthenticationConfiguration): AuthenticationManager = config.authenticationManager
 
     @Bean
     fun passwordEncoder(): PasswordEncoder = BCryptPasswordEncoder()

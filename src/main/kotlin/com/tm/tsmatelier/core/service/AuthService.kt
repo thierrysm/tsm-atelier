@@ -35,7 +35,5 @@ class AuthService(
         }
     }
 
-    fun refreshToken(token: String): AuthResponse {
-        return refreshTokenService.processRefreshToken(token)
-    }
+    fun refreshToken(token: String): AuthResponse = refreshTokenService.processRefreshToken(token)
 }

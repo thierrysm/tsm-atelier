@@ -54,7 +54,8 @@ class AuthController(
 
     private fun createAuthenticatedResponse(authResponse: AuthResponse): ResponseEntity<LoginResponse> {
         val refreshTokenCookie =
-            ResponseCookie.from("refreshToken", authResponse.refreshToken)
+            ResponseCookie
+                .from("refreshToken", authResponse.refreshToken)
                 .httpOnly(true)
                 .secure(true)
                 .path("/")
@@ -62,7 +63,8 @@ class AuthController(
                 .sameSite("Strict")
                 .build()
 
-        return ResponseEntity.ok()
+        return ResponseEntity
+            .ok()
             .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
             .body(LoginResponse(authResponse.accessToken))
     }

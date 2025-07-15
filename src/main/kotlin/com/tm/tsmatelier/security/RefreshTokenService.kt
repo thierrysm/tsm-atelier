@@ -29,7 +29,8 @@ class RefreshTokenService(
     @Transactional
     fun processRefreshToken(providedToken: String): AuthResponse {
         val refreshToken =
-            refreshTokenRepository.findByToken(providedToken)
+            refreshTokenRepository
+                .findByToken(providedToken)
                 .orElseThrow { RefreshTokenException() }
 
         if (refreshToken.revoked) {

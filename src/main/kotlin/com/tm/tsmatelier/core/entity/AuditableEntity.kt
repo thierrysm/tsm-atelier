@@ -37,11 +37,7 @@ abstract class AuditableEntity : Serializable {
         return id != null && id == other.id
     }
 
-    override fun hashCode(): Int {
-        return Objects.hashCode(id)
-    }
+    override fun hashCode(): Int = Objects.hashCode(id)
 
-    override fun toString(): String {
-        return "${this.javaClass.simpleName}(id=$id)"
-    }
+    override fun toString(): String = "${this.javaClass.simpleName}(id=$id)"
 }
