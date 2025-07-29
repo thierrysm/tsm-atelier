@@ -36,4 +36,8 @@ class AuthService(
     }
 
     fun refreshToken(token: String): AuthResponse = refreshTokenService.processRefreshToken(token)
+
+    fun logout(providedToken: String) {
+        refreshTokenService.logout(providedToken)
+    }
 }
