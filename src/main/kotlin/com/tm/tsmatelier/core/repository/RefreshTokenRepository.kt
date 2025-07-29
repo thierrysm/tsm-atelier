@@ -8,7 +8,7 @@ import java.util.Optional
 import java.util.UUID
 
 interface RefreshTokenRepository : JpaRepository<RefreshTokenEntity, UUID> {
-    fun findByToken(token: String): Optional<RefreshTokenEntity>
+    fun findByToken(token: String): RefreshTokenEntity?
 
     @Query("SELECT t FROM RefreshTokenEntity t WHERE t.user = :user AND t.revoked = false")
     fun findAllValidTokensByUser(user: UserEntity): List<RefreshTokenEntity>

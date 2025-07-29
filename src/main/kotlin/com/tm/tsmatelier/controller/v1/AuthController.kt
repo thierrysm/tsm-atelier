@@ -3,8 +3,9 @@ package com.tm.tsmatelier.controller.v1
 import com.tm.tsmatelier.core.dtos.reponse.AuthResponse
 import com.tm.tsmatelier.core.dtos.reponse.LoginResponse
 import com.tm.tsmatelier.core.dtos.request.LoginRequest
+import com.tm.tsmatelier.core.dtos.request.LogoutRequest
+import com.tm.tsmatelier.core.dtos.request.RefreshTokenRequest
 import com.tm.tsmatelier.core.dtos.request.RegisterRequest
-import com.tm.tsmatelier.core.exception.RefreshTokenException
 import com.tm.tsmatelier.core.service.AuthService
 import com.tm.tsmatelier.core.service.UserService
 import jakarta.validation.Valid
@@ -12,7 +13,6 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseCookie
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.CookieValue
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -42,14 +42,32 @@ class AuthController(
 
     @PostMapping("/refresh")
     fun refreshToken(
-        @CookieValue(name = "refreshToken") refreshTokenValue: String?,
+        @RequestBody request: RefreshTokenRequest,
     ): ResponseEntity<LoginResponse> {
-        val token =
-            refreshTokenValue.takeIf { !it.isNullOrBlank() }
-                ?: throw RefreshTokenException()
-
-        val authResponse = authService.refreshToken(token)
+        val authResponse = authService.refreshToken(request.refreshToken)
         return createAuthenticatedResponse(authResponse)
+    }
+
+    @PostMapping("/logout")
+    fun logout(
+        @RequestBody request: LogoutRequest,
+    ): ResponseEntity<String> {
+        authService.logout(request.refreshToken)
+
+        val emptyCookie =
+            ResponseCookie
+                .from("refreshToken", "")
+                .httpOnly(true)
+                .secure(true)
+                .path("/")
+                .maxAge(0)
+                .sameSite("Strict")
+                .build()
+
+        return ResponseEntity
+            .ok()
+            .header(HttpHeaders.SET_COOKIE, emptyCookie.toString())
+            .body("User logged out successfully!")
     }
 
     private fun createAuthenticatedResponse(authResponse: AuthResponse): ResponseEntity<LoginResponse> {
@@ -63,9 +81,15 @@ class AuthController(
                 .sameSite("Strict")
                 .build()
 
+        val body =
+            LoginResponse(
+                accessToken = authResponse.accessToken,
+                refreshToken = authResponse.refreshToken,
+            )
+
         return ResponseEntity
             .ok()
             .header(HttpHeaders.SET_COOKIE, refreshTokenCookie.toString())
-            .body(LoginResponse(authResponse.accessToken))
+            .body(body)
     }
 }

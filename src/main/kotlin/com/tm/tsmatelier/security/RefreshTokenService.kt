@@ -4,11 +4,11 @@ import com.tm.tsmatelier.config.jwt.JwtConfigurationProperties
 import com.tm.tsmatelier.core.dtos.reponse.AuthResponse
 import com.tm.tsmatelier.core.entity.RefreshTokenEntity
 import com.tm.tsmatelier.core.entity.UserEntity
-import com.tm.tsmatelier.core.exception.RefreshTokenException
 import com.tm.tsmatelier.core.exception.RefreshTokenExpiredException
 import com.tm.tsmatelier.core.exception.TokenCompromisedException
 import com.tm.tsmatelier.core.repository.RefreshTokenRepository
 import com.tm.tsmatelier.core.repository.UserRepository
+import com.tm.tsmatelier.util.orThrow
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.core.userdetails.UsernameNotFoundException
@@ -31,21 +31,20 @@ class RefreshTokenService(
         val refreshToken =
             refreshTokenRepository
                 .findByToken(providedToken)
-                .orElseThrow { RefreshTokenException() }
 
-        if (refreshToken.revoked) {
-            tokenRevocationService.revokeAllTokensForUser(refreshToken.user)
+        if (refreshToken.orThrow().revoked) {
+            tokenRevocationService.revokeAllTokensForUser(refreshToken.orThrow().user)
             throw TokenCompromisedException()
         }
 
-        if (refreshToken.expiryDate.isBefore(Instant.now())) {
-            refreshTokenRepository.delete(refreshToken)
+        if (refreshToken.orThrow().expiryDate.isBefore(Instant.now())) {
+            refreshTokenRepository.delete(refreshToken.orThrow())
             throw RefreshTokenExpiredException()
         }
 
-        refreshToken.revoked = true
+        refreshToken.orThrow().revoked = true
 
-        return createNewSessionFor(refreshToken.user)
+        return createNewSessionFor(refreshToken.orThrow().user)
     }
 
     @Transactional
@@ -72,6 +71,13 @@ class RefreshTokenService(
             accessToken = newAccessToken,
             refreshToken = newRefreshToken.token,
         )
+    }
+
+    @Transactional
+    fun logout(providedToken: String) {
+        refreshTokenRepository.findByToken(providedToken)?.let { token ->
+            token.revoked = true
+        }
     }
 
     private fun createAndSaveNewTokenFor(user: UserEntity): RefreshTokenEntity {
