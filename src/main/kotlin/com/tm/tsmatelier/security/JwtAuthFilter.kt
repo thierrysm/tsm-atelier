@@ -1,19 +1,20 @@
 package com.tm.tsmatelier.security
 
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.tm.tsmatelier.controller.exception.ErrorResponse
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
-import org.springframework.web.servlet.HandlerExceptionResolver
 
 @Component
 class JwtAuthFilter(
     private val jwtAuthenticationManager: JwtAuthenticationManager,
-    @Qualifier("handlerExceptionResolver")
-    private val resolver: HandlerExceptionResolver,
+    private val objectMapper: ObjectMapper,
 ) : OncePerRequestFilter() {
     override fun doFilterInternal(
         request: HttpServletRequest,
@@ -35,7 +36,23 @@ class JwtAuthFilter(
             }
             filterChain.doFilter(request, response)
         } catch (exception: Exception) {
-            resolver.resolveException(request, response, null, exception)
+            sendErrorResponse(request, response, exception)
         }
+    }
+
+    private fun sendErrorResponse(
+        request: HttpServletRequest,
+        response: HttpServletResponse,
+        exception: Exception,
+    ) {
+        val errorResponse =
+            ErrorResponse(
+                httpStatus = HttpStatus.UNAUTHORIZED,
+                exception = exception,
+                request = request,
+            )
+        response.status = errorResponse.status
+        response.contentType = MediaType.APPLICATION_JSON_VALUE
+        response.writer.write(objectMapper.writeValueAsString(errorResponse))
     }
 }

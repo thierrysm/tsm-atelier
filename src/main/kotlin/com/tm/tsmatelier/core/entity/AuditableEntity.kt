@@ -5,6 +5,7 @@ import jakarta.persistence.EntityListeners
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.Id
 import jakarta.persistence.MappedSuperclass
+import jakarta.persistence.Version
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.annotation.LastModifiedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
@@ -20,6 +21,9 @@ abstract class AuditableEntity : Serializable {
     @GeneratedValue
     @Column(name = "id", updatable = false, nullable = false)
     val id: UUID? = null
+
+    @Version
+    var version: Long = 0
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
