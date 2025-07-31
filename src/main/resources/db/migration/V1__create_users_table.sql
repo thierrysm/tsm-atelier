@@ -7,6 +7,7 @@ CREATE TABLE users (
     phone                     VARCHAR(11)  NOT NULL,
     created_at                TIMESTAMP    NOT NULL,
     updated_at                TIMESTAMP    NOT NULL,
+    version                   BIGINT       NOT NULL,
 
     CONSTRAINT pk_users PRIMARY KEY (id),
     CONSTRAINT uq_users_cpf UNIQUE (cpf),

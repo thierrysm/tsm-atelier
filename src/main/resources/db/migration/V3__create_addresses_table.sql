@@ -11,6 +11,7 @@ CREATE TABLE addresses (
     user_id      UUID         NOT NULL,
     created_at   TIMESTAMP    NOT NULL,
     updated_at   TIMESTAMP    NOT NULL,
+    version      BIGINT       NOT NULL,
 
     CONSTRAINT pk_addresses PRIMARY KEY (id),
     CONSTRAINT fk_addresses_on_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE

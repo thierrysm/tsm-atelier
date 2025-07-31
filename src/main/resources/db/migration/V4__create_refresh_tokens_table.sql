@@ -6,6 +6,7 @@ CREATE TABLE refresh_tokens (
     expiry_date  TIMESTAMP    NOT NULL,
     created_at   TIMESTAMP    NOT NULL,
     updated_at   TIMESTAMP    NOT NULL,
+    version      BIGINT       NOT NULL,
 
     CONSTRAINT pk_refresh_tokens PRIMARY KEY (id),
     CONSTRAINT uq_refresh_tokens_token UNIQUE (token),

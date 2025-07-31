@@ -13,4 +13,12 @@ class AuthenticatedUser(
     override fun getPassword(): String = user.password
 
     override fun getUsername(): String = user.email
+
+    override fun isAccountNonExpired(): Boolean = true
+
+    override fun isAccountNonLocked(): Boolean = true
+
+    override fun isCredentialsNonExpired(): Boolean = true
+
+    override fun isEnabled(): Boolean = true
 }
