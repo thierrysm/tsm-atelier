@@ -10,6 +10,7 @@ import jakarta.persistence.EnumType
 import jakarta.persistence.Enumerated
 import jakarta.persistence.FetchType
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.OneToMany
 import jakarta.persistence.OrderBy
 import jakarta.persistence.Table
@@ -24,13 +25,15 @@ class ProductEntity(
     var description: String,
     @Column(nullable = false, precision = 10, scale = 2)
     var price: BigDecimal,
-    @Column(nullable = false, unique = true, length = 20)
+    @Column(nullable = false, unique = true, length = 30)
     var sku: String,
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     var category: ProductCategoryEnum,
     @Column(nullable = false)
     var isActive: Boolean = true,
+    @Column(precision = 10, scale = 2)
+    var promotionalPrice: BigDecimal? = null,
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "product_materials", joinColumns = [JoinColumn(name = "product_id")])
     @Column(name = "material")
@@ -44,4 +47,7 @@ class ProductEntity(
     @OneToMany(mappedBy = "product", cascade = [CascadeType.ALL], orphanRemoval = true, fetch = FetchType.EAGER)
     @OrderBy("isPrimary DESC")
     var images: MutableList<ProductImageEntity> = mutableListOf(),
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "collection_id")
+    var collection: CollectionEntity? = null,
 ) : AuditableEntity()

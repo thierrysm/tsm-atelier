@@ -9,5 +9,7 @@ object ExceptionMessage {
     const val TOKEN_COMPROMISED_EXCEPTION = "Revoked token has been reused. All sessions have been invalidated for security reasons"
     const val INVALID_JWT_EXCEPTION = "The authentication token is invalid, expired, or malformed"
     const val INVALID_CREDENTIALS_EXCEPTION = "Invalid email or  password"
-    const val PRODUCT_ALREADY_EXISTS = "Product with %s already exists"
+    const val PRODUCT_ALREADY_EXISTS_EXCEPTION = "Product with %s already exists"
+    const val PRODUCT_NOT_FOUND_EXCEPTION = "Product with %s not found"
+    const val COLLECTION_ALREADY_EXISTS_EXCEPTION = "Collection with %s already exists"
 }

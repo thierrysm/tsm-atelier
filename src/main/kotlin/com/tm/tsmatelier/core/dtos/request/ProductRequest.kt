@@ -19,7 +19,7 @@ data class ProductRequest(
     @field:Positive
     val price: BigDecimal,
     @field:NotBlank
-    @field:Size(max = 20)
+    @field:Size(max = 30)
     val sku: String,
     @field:NotNull
     val category: ProductCategoryEnum,
@@ -40,7 +40,7 @@ data class ProductRequest(
 
     data class ProductVariantRequest(
         @field:NotBlank
-        @field:Size(max = 20)
+        @field:Size(max = 30)
         val sku: String,
         @field:NotNull
         val size: ProductSizeEnum,
