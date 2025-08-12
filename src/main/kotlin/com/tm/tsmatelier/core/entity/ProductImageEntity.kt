@@ -14,7 +14,6 @@ class ProductImageEntity(
     var imageUrl: String,
     @Column(name = "alt_text")
     var altText: String?,
-    // Flag para saber qual é a imagem principal (ex: a da vitrine)
     @Column(nullable = false)
     var isPrimary: Boolean = false,
     @ManyToOne(fetch = FetchType.LAZY)

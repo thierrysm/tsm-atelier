@@ -2,6 +2,7 @@ package com.tm.tsmatelier.core.mapper
 
 import com.tm.tsmatelier.core.dtos.reponse.ProductResponse
 import com.tm.tsmatelier.core.dtos.request.ProductRequest
+import com.tm.tsmatelier.core.dtos.request.UpdateProductRequest
 import com.tm.tsmatelier.core.entity.ProductEntity
 import com.tm.tsmatelier.core.entity.ProductImageEntity
 import com.tm.tsmatelier.core.entity.ProductVariantEntity
@@ -56,6 +57,7 @@ class ProductMapper {
             sku = entity.sku,
             category = entity.category,
             isActive = entity.isActive,
+            promotionalPrice = entity.promotionalPrice,
             materials = entity.materials,
             careInstructions = entity.careInstructions,
             variants =
@@ -80,4 +82,26 @@ class ProductMapper {
             createdAt = entity.createdAt!!,
             updatedAt = entity.updatedAt!!,
         )
+
+    fun applyUpdates(
+        product: ProductEntity,
+        request: UpdateProductRequest,
+    ) {
+        request.name?.let { product.name = it }
+        request.description?.let { product.description = it }
+        request.price?.let { product.price = it }
+        request.promotionalPrice?.let { product.promotionalPrice = it }
+        request.category?.let { product.category = it }
+        request.isActive?.let { product.isActive = it }
+        request.materials?.let { product.materials = it.toMutableSet() }
+        request.careInstructions?.let { product.careInstructions = it.toMutableSet() }
+
+        request.variants?.forEach { variantRequest ->
+            product.variants
+                .find { it.id == variantRequest.id }
+                ?.let { variant ->
+                    variantRequest.quantityInStock?.let { variant.quantityInStock = it }
+                }
+        }
+    }
 }

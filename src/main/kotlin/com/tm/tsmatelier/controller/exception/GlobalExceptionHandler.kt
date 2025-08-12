@@ -1,8 +1,10 @@
 package com.tm.tsmatelier.controller.exception
 
 import com.tm.tsmatelier.config.EnvironmentConfiguration
+import com.tm.tsmatelier.core.exception.CollectionAlreadyExistsException
 import com.tm.tsmatelier.core.exception.InvalidCredentialsException
 import com.tm.tsmatelier.core.exception.InvalidJwtException
+import com.tm.tsmatelier.core.exception.ProductNotFoundException
 import com.tm.tsmatelier.core.exception.RefreshTokenException
 import com.tm.tsmatelier.core.exception.RefreshTokenExpiredException
 import com.tm.tsmatelier.core.exception.RefreshTokenRevokedException
@@ -93,6 +95,18 @@ class GlobalExceptionHandler(
         exception: InvalidCredentialsException,
         request: HttpServletRequest,
     ): ResponseEntity<ErrorResponse> = buildResponse(HttpStatus.UNAUTHORIZED, exception, request)
+
+    @ExceptionHandler(ProductNotFoundException::class)
+    fun handleProductNotFoundException(
+        exception: ProductNotFoundException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ErrorResponse> = buildResponse(HttpStatus.NOT_FOUND, exception, request)
+
+    @ExceptionHandler(CollectionAlreadyExistsException::class)
+    fun handleCollectionAlreadyExistsException(
+        exception: CollectionAlreadyExistsException,
+        request: HttpServletRequest,
+    ): ResponseEntity<ErrorResponse> = buildResponse(HttpStatus.BAD_REQUEST, exception, request)
 
     private fun buildResponse(
         httpStatus: HttpStatus,

@@ -11,6 +11,7 @@ data class ProductResponse(
     val name: String,
     val description: String,
     val price: BigDecimal,
+    val promotionalPrice: BigDecimal?,
     val sku: String,
     val category: ProductCategoryEnum,
     val isActive: Boolean,

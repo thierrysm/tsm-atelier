@@ -1,6 +1,6 @@
 CREATE TABLE product_variants (
     id                UUID         NOT NULL DEFAULT gen_random_uuid(),
-    sku               VARCHAR(20)  NOT NULL,
+    sku               VARCHAR(30)  NOT NULL,
     size              VARCHAR(2)   NOT NULL,
     color             VARCHAR(40) NOT NULL,
     quantity_in_stock INT          NOT NULL,
