@@ -40,7 +40,7 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-flyway-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-data-jpa-test")
 	testImplementation("org.springframework.boot:spring-boot-starter-webmvc-test")
-	testImplementation("org.mockito:mockito-core:5.22.0")
+	testImplementation("org.mockito:mockito-core:5.23.0")
 
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
