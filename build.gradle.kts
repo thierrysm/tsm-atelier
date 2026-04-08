@@ -29,7 +29,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
-	implementation("org.flywaydb:flyway-database-postgresql:12.1.1")
+	implementation("org.flywaydb:flyway-database-postgresql:12.3.0")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.mapstruct:mapstruct:1.6.3")
