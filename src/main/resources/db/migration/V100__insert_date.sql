@@ -141,3 +141,13 @@ VALUES
     (6, 'Lavar à mão',                             1),
     (6, 'Não torcer',                              2),
     (6, 'Passar a ferro levemente úmido',          3);
+
+-- ─── Media Assets ────────────────────────────────────────────────────────────
+
+INSERT INTO media_assets (id, "position", url, file_name, alt_text, link_url)
+VALUES
+    (1, 'HEADER_LOGO', 'https://tsmatelier.com.br/assets/banners/colecao-outono.jpg', 'colecao-outono.jpg', 'Banner principal da coleção de Outono', '/colecoes/outono'),
+    (2, 'HOME_BANNER_MAIN', 'https://tsmatelier.com.br/assets/banners/promo-vestidos.png', 'promo-vestidos.png', 'Promoção de vestidos de festa', '/categoria/vestidos'),
+    (3, 'HOME_SECTION_TWO', 'https://tsmatelier.com.br/assets/banners/novos-acessorios.webp', 'novos-acessorios.webp', 'Novos colares e brincos', '/categoria/acessorios'),
+    (4, 'HOME_SECTION_THREE', 'https://tsmatelier.com.br/assets/popups/cupom-primeira-compra.png', 'cupom-primeira-compra.png', 'Cupom de 10% na primeira compra', '/cadastro'),
+    (5, 'FOOTER_LOGO', 'https://tsmatelier.com.br/assets/institucional/nossa-historia.jpg', 'nossa-historia.jpg', 'Costureiras trabalhando no ateliê', '/sobre-nos');

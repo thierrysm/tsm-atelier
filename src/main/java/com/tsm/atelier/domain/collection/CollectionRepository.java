@@ -1,6 +1,7 @@
 package com.tsm.atelier.domain.collection;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,6 +23,8 @@ public interface CollectionRepository extends JpaRepository<Collection, Long> {
       @Param("featured") Boolean featured,
       @Param("isNew") Boolean isNew,
       @Param("showInHeader") Boolean showInHeader);
+
+  Optional<Collection> findBySlug(String slug);
 
   Boolean existsByName(String name);
 

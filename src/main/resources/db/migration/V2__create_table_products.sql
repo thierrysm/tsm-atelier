@@ -6,10 +6,10 @@ CREATE TABLE products (
                           price         NUMERIC(10, 2)  NOT NULL,
                           category      VARCHAR(20)     NOT NULL,
                           status        VARCHAR(10)     NOT NULL,
-                          disabled_at   TIMESTAMP,
                           collection_id BIGINT,
-                          created_at    TIMESTAMP,
-                          updated_at    TIMESTAMP,
+                          disabled_at   TIMESTAMPTZ,
+                          created_at    TIMESTAMPTZ,
+                          updated_at    TIMESTAMPTZ,
 
                           CONSTRAINT fk_products_collection
                               FOREIGN KEY (collection_id)

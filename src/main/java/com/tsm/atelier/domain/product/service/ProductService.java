@@ -3,8 +3,6 @@ package com.tsm.atelier.domain.product.service;
 import com.tsm.atelier.domain.collection.Collection;
 import com.tsm.atelier.domain.collection.CollectionRepository;
 import com.tsm.atelier.domain.product.Product;
-import com.tsm.atelier.domain.product.ProductCare;
-import com.tsm.atelier.domain.product.ProductColor;
 import com.tsm.atelier.domain.product.ProductComposition;
 import com.tsm.atelier.domain.product.ProductStatus;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductCompositionRequestDTO;
@@ -20,7 +18,7 @@ import com.tsm.atelier.domain.product.repository.ProductRepository;
 import com.tsm.atelier.exception.EntityAlreadyExistsException;
 import com.tsm.atelier.exception.EntityNotFoundException;
 import com.tsm.atelier.shared.util.SlugUtils;
-import java.util.List;
+import java.time.Instant;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
@@ -78,13 +76,6 @@ public class ProductService {
         productRepository
             .findBySlugAndStatus(slug, ProductStatus.ACTIVE)
             .orElseThrow(() -> new EntityNotFoundException("Produto", "slug", slug));
-
-    List<ProductColor> colors = productColorRepository.findAllByProductId(product.getId());
-
-    List<ProductComposition> compositions =
-        productCompositionRepository.findAllByProductId(product.getId());
-
-    List<ProductCare> careInstructions = productCareRepository.findAllByProductId(product.getId());
 
     return productMapper.toDetailsResponse(product);
   }
@@ -179,6 +170,7 @@ public class ProductService {
             .orElseThrow(() -> new EntityNotFoundException("Produto", "id", id));
 
     product.setStatus(ProductStatus.ARCHIVED);
+    product.setDisabledAt(Instant.now());
   }
 
   private Collection resolveCollection(Long collectionId) {

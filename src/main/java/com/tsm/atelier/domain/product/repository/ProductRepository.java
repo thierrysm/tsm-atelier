@@ -3,11 +3,13 @@ package com.tsm.atelier.domain.product.repository;
 import com.tsm.atelier.domain.product.Product;
 import com.tsm.atelier.domain.product.ProductStatus;
 import com.tsm.atelier.domain.product.dto.v1.internal.ProductIntegrityDTO;
+import java.time.Instant;
 import java.util.Optional;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -47,4 +49,10 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
   @EntityGraph(attributePaths = {"colors", "colors.images", "colors.variants"})
   Slice<Product> findByCollectionId(Long collectionId, Pageable pageable);
+
+  @Modifying(clearAutomatically = true)
+  @Query(
+      "UPDATE Product p SET p.status = 'ARCHIVED', p.disabledAt = :disabledAt WHERE p.collection.id = :collectionId")
+  void archiveAllByCollectionId(
+      @Param("collectionId") Long collectionId, @Param("disabledAt") Instant disabledAt);
 }

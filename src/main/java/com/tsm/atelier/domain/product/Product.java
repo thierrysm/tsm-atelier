@@ -16,7 +16,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -61,7 +61,7 @@ public class Product extends BaseEntity {
   @Column(nullable = false, length = 20)
   private ProductStatus status = ProductStatus.DRAFT;
 
-  @Column private LocalDateTime disabledAt;
+  @Column private Instant disabledAt;
 
   @ManyToOne
   @JoinColumn(name = "collection_id")

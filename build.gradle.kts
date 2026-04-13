@@ -31,9 +31,11 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
 	implementation("org.flywaydb:flyway-database-postgresql:12.1.1")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
+	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.mapstruct:mapstruct:1.6.3")
 	implementation("software.amazon.awssdk:s3:2.25.0")
+
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
@@ -45,7 +47,6 @@ dependencies {
 	testImplementation("org.mockito:mockito-core:5.23.0")
 
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-
 }
 
 tasks.withType<Test> {

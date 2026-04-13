@@ -8,6 +8,7 @@ import com.tsm.atelier.domain.product.repository.ProductColorRepository;
 import com.tsm.atelier.domain.product.repository.ProductImageRepository;
 import com.tsm.atelier.exception.BusinessException;
 import com.tsm.atelier.exception.EntityNotFoundException;
+import com.tsm.atelier.shared.UploadResult;
 import com.tsm.atelier.shared.image.ImageFolder;
 import com.tsm.atelier.shared.image.ImageService;
 import jakarta.transaction.Transactional;
@@ -36,10 +37,10 @@ public class ProductImageService {
       productImageRepository.removeCoversFromColor(colorId);
     }
 
-    String url = imageService.upload(file, ImageFolder.PRODUCTS);
+    UploadResult result = imageService.upload(file, ImageFolder.PRODUCTS);
 
     ProductImage image = new ProductImage();
-    image.setUrl(url);
+    image.setUrl(result.url());
     image.setFileName(file.getOriginalFilename());
     image.setIsCover(isCover);
     image.setDisplayOrder(productImageRepository.countByProductColorId(colorId) + 1);

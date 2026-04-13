@@ -4,7 +4,7 @@ import com.tsm.atelier.exception.BusinessException;
 import com.tsm.atelier.exception.EntityAlreadyExistsException;
 import com.tsm.atelier.exception.EntityNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
             ex.getClass().getName(),
             "Tamanho máximo de upload excedido. Por favor, envie um arquivo menor que 10MB.",
             request.getRequestURI(),
-            LocalDateTime.now(),
+            Instant.now(),
             null);
     return ResponseEntity.status(413).body(error);
   }
@@ -40,7 +40,7 @@ public class GlobalExceptionHandler {
             ex.getClass().getName(),
             ex.getMessage(),
             request.getRequestURI(),
-            LocalDateTime.now(),
+            Instant.now(),
             null);
     return ResponseEntity.status(404).body(error);
   }
@@ -55,7 +55,7 @@ public class GlobalExceptionHandler {
             ex.getClass().getName(),
             ex.getMessage(),
             request.getRequestURI(),
-            LocalDateTime.now(),
+            Instant.now(),
             null);
     return ResponseEntity.status(409).body(error);
   }
@@ -75,7 +75,7 @@ public class GlobalExceptionHandler {
             ex.getClass().getName(),
             "Um ou mais campos são inválidos",
             request.getRequestURI(),
-            LocalDateTime.now(),
+            Instant.now(),
             fieldErrors);
     return ResponseEntity.status(400).body(error);
   }
@@ -89,7 +89,7 @@ public class GlobalExceptionHandler {
             "Ocorreu um erro inesperado. Tente novamente mais tarde.",
             ex.getMessage(),
             request.getRequestURI(),
-            LocalDateTime.now(),
+            Instant.now(),
             null);
     return ResponseEntity.status(500).body(error);
   }
@@ -104,7 +104,7 @@ public class GlobalExceptionHandler {
             "O endpoint " + ex.getRequestURL() + " não existe.",
             ex.getMessage(),
             request.getRequestURI(),
-            LocalDateTime.now(),
+            Instant.now(),
             null);
     return ResponseEntity.status(404).body(error);
   }
@@ -121,8 +121,8 @@ public class GlobalExceptionHandler {
             ex.getClass().getName(),
             ex.getMessage(),
             request.getRequestURI(),
-            LocalDateTime.now(),
-            fields);
+            Instant.now(),
+            null);
     return ResponseEntity.status(400).body(error);
   }
 }

@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import lombok.AllArgsConstructor;
@@ -40,7 +41,7 @@ public class Collection extends BaseEntity {
   @Column(nullable = false, columnDefinition = "TEXT")
   private String description;
 
-  @Column(nullable = false, columnDefinition = "TEXT")
+  @Column(columnDefinition = "TEXT")
   private String imageUrl;
 
   @Enumerated(EnumType.STRING)
@@ -58,6 +59,8 @@ public class Collection extends BaseEntity {
 
   @Column(nullable = false)
   private Integer displayOrder = 0;
+
+  @Column private Instant disabledAt;
 
   @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL)
   private List<Product> products = new ArrayList<>();
