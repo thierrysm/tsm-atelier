@@ -85,7 +85,7 @@ jobs:
         run: echo "BRANCH_NAME=build/upgrade-gradle-wrapper-$(date +%Y%m%d-%H%M%S)" >> $GITHUB_ENV
       - name: Create pull request
         if: steps.list_prs.outputs.pr_exists == 'false'
-        uses: peter-evans/create-pull-request@v8.1.0
+        uses: peter-evans/create-pull-request@v8.1.1
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ env.BRANCH_NAME }}
