@@ -33,7 +33,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.mapstruct:mapstruct:1.6.3")
-	implementation("software.amazon.awssdk:s3:2.25.0")
+	implementation("software.amazon.awssdk:s3:2.42.38")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("org.postgresql:postgresql")
 	annotationProcessor("org.projectlombok:lombok")
