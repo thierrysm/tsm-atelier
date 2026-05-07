@@ -12,5 +12,5 @@ public record ProductPatchDTO(
     Optional<@Size(min = 5) String> description,
     Optional<@DecimalMin("0.01") BigDecimal> price,
     Optional<List<ProductCompositionRequestDTO>> material,
-    Optional<List<ProductCareRequestDTO>> careInstructions,
+    Optional<List<String>> careInstructions,
     Optional<ProductCategory> category) {}

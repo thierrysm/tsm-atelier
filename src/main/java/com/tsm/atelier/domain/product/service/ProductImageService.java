@@ -11,9 +11,11 @@ import com.tsm.atelier.exception.EntityNotFoundException;
 import com.tsm.atelier.shared.UploadResult;
 import com.tsm.atelier.shared.image.ImageFolder;
 import com.tsm.atelier.shared.image.ImageService;
-import jakarta.transaction.Transactional;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -26,8 +28,12 @@ public class ProductImageService {
   private final ProductMapper productMapper;
 
   @Transactional
-  public ProductImageResponseDTO upload(
-      Long productId, Long colorId, MultipartFile file, Boolean isCover) {
+  public List<ProductImageResponseDTO> upload(
+      Long productId, Long colorId, List<MultipartFile> files, Boolean isCover) {
+    if (files == null || files.isEmpty()) {
+      throw new BusinessException("Nenhuma imagem enviada");
+    }
+
     ProductColor color =
         productColorRepository
             .findByIdAndProductId(colorId, productId)
@@ -37,49 +43,62 @@ public class ProductImageService {
       productImageRepository.removeCoversFromColor(colorId);
     }
 
-    UploadResult result = imageService.upload(file, ImageFolder.PRODUCTS);
+    int currentOrder = productImageRepository.countByProductColorId(colorId);
+    List<ProductImage> savedImages = new ArrayList<>();
 
-    ProductImage image = new ProductImage();
-    image.setUrl(result.url());
-    image.setFileName(file.getOriginalFilename());
-    image.setIsCover(isCover);
-    image.setDisplayOrder(productImageRepository.countByProductColorId(colorId) + 1);
-    image.setProductColor(color);
+    for (int i = 0; i < files.size(); i++) {
+      MultipartFile file = files.get(i);
+      UploadResult result = imageService.upload(file, ImageFolder.PRODUCTS);
 
-    return productMapper.toImageResponse(productImageRepository.save(image));
+      ProductImage image = new ProductImage();
+      image.setUrl(result.url());
+      image.setFileName(result.fileName());
+      image.setIsCover(Boolean.TRUE.equals(isCover) && i == 0);
+      currentOrder++;
+      image.setDisplayOrder(currentOrder);
+      image.setProductColor(color);
+
+      savedImages.add(productImageRepository.save(image));
+    }
+
+    return savedImages.stream().map(productMapper::toImageResponse).toList();
   }
 
   @Transactional
   public void setCover(Long productId, Long colorId, Long imageId) {
-    ProductImage image =
-        productImageRepository
-            .findByIdAndProductColorId(imageId, colorId)
-            .orElseThrow(() -> new EntityNotFoundException("Image do produto", "id", imageId));
+    productColorRepository
+        .findByIdAndProductId(colorId, productId)
+        .orElseThrow(() -> new EntityNotFoundException("Cor do produto", "id", colorId));
 
-    if (!image.getProductColor().getProduct().getId().equals(productId))
-      throw new BusinessException("A cor do produto não pertence a este produto");
+    if (!productImageRepository.existsByIdAndProductColorId(imageId, colorId)) {
+      throw new EntityNotFoundException("Imagem do produto", "id", imageId);
+    }
 
-    productImageRepository.removeCoversFromColor(colorId);
-
-    image.setIsCover(true);
+    productImageRepository.clearCoversExcept(colorId, imageId);
+    productImageRepository.markAsCover(imageId);
   }
 
   @Transactional
   public void delete(Long productId, Long colorId, Long imageId) {
-    ProductColor productColor =
-        productColorRepository
-            .findByIdAndProductId(colorId, productId)
-            .orElseThrow(() -> new EntityNotFoundException("Cor do produto", "id", colorId));
-
-    if (!productColor.getProduct().getId().equals(productId))
-      throw new EntityNotFoundException("Produto", "id", productId);
+    productColorRepository
+        .findByIdAndProductId(colorId, productId)
+        .orElseThrow(() -> new EntityNotFoundException("Cor do produto", "id", colorId));
 
     ProductImage image =
         productImageRepository
-            .findById(imageId)
-            .orElseThrow(() -> new EntityNotFoundException("Image do produto", "id", imageId));
+            .findByIdAndProductColorId(imageId, colorId)
+            .orElseThrow(() -> new EntityNotFoundException("Imagem do produto", "id", imageId));
 
-    imageService.delete(image.getUrl());
+    boolean wasCover = Boolean.TRUE.equals(image.getIsCover());
+    String urlToDelete = image.getUrl();
+
     productImageRepository.delete(image);
+    imageService.deleteAfterCommit(urlToDelete);
+
+    if (wasCover) {
+      productImageRepository
+          .findFirstByProductColorIdAndIdNotOrderByDisplayOrderAsc(colorId, imageId)
+          .ifPresent(next -> productImageRepository.markAsCover(next.getId()));
+    }
   }
 }

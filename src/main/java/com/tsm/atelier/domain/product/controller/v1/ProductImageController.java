@@ -2,7 +2,9 @@ package com.tsm.atelier.domain.product.controller.v1;
 
 import com.tsm.atelier.domain.product.dto.v1.response.ProductImageResponseDTO;
 import com.tsm.atelier.domain.product.service.ProductImageService;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,13 +23,13 @@ public class ProductImageController {
   private final ProductImageService productImageService;
 
   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-  public ResponseEntity<ProductImageResponseDTO> upload(
+  public ResponseEntity<List<ProductImageResponseDTO>> upload(
       @PathVariable Long productId,
       @PathVariable Long colorId,
-      @RequestParam MultipartFile file,
+      @RequestParam("file") List<MultipartFile> files,
       @RequestParam(defaultValue = "false") Boolean isCover) {
-    return ResponseEntity.status(201)
-        .body(productImageService.upload(productId, colorId, file, isCover));
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(productImageService.upload(productId, colorId, files, isCover));
   }
 
   @PatchMapping("/{imageId}/cover")

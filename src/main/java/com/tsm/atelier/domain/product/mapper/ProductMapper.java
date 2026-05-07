@@ -3,20 +3,17 @@ package com.tsm.atelier.domain.product.mapper;
 import com.tsm.atelier.domain.collection.Collection;
 import com.tsm.atelier.domain.product.CompositionMaterial;
 import com.tsm.atelier.domain.product.Product;
-import com.tsm.atelier.domain.product.ProductCare;
 import com.tsm.atelier.domain.product.ProductColor;
 import com.tsm.atelier.domain.product.ProductComposition;
 import com.tsm.atelier.domain.product.ProductImage;
 import com.tsm.atelier.domain.product.ProductVariant;
 import com.tsm.atelier.domain.product.dto.v1.request.CompositionMaterialRequestDTO;
-import com.tsm.atelier.domain.product.dto.v1.request.ProductCareRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductColorRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductCompositionRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductImageRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductVariantRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.response.ColorSummaryResponseDTO;
-import com.tsm.atelier.domain.product.dto.v1.response.ProductCareResponseDTO;
 import com.tsm.atelier.domain.product.dto.v1.response.ProductColorDetailsResponseDTO;
 import com.tsm.atelier.domain.product.dto.v1.response.ProductColorResponseDTO;
 import com.tsm.atelier.domain.product.dto.v1.response.ProductCompositionResponseDTO;
@@ -44,10 +41,6 @@ public interface ProductMapper {
 
   @Mapping(target = "id", ignore = true)
   @Mapping(target = "product", ignore = true)
-  ProductCare toEntity(ProductCareRequestDTO request);
-
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "product", ignore = true)
   ProductColor toEntity(ProductColorRequestDTO request);
 
   @Mapping(target = "id", ignore = true)
@@ -63,35 +56,13 @@ public interface ProductMapper {
   @Mapping(target = "product", ignore = true)
   ProductComposition toEntity(ProductCompositionRequestDTO request);
 
-  @Mapping(target = "id", ignore = true)
-  @Mapping(target = "composition", ignore = true)
   CompositionMaterial toEntity(CompositionMaterialRequestDTO request);
 
   @AfterMapping
-  default void setCompositionBackReference(@MappingTarget ProductComposition composition) {
-    if (composition.getMaterials() != null) {
-      composition.getMaterials().forEach(material -> material.setComposition(composition));
-    }
-  }
-
-  @AfterMapping
   default void setBackReferences(@MappingTarget Product product) {
-    if (product.getCareInstructions() != null) {
-      product.getCareInstructions().forEach(care -> care.setProduct(product));
-    }
 
     if (product.getCompositions() != null) {
-      product
-          .getCompositions()
-          .forEach(
-              composition -> {
-                composition.setProduct(product); // ← seta o product_id
-                if (composition.getMaterials() != null) {
-                  composition
-                      .getMaterials()
-                      .forEach(material -> material.setComposition(composition));
-                }
-              });
+      product.getCompositions().forEach(composition -> composition.setProduct(product));
     }
 
     if (product.getColors() != null) {
@@ -128,7 +99,7 @@ public interface ProductMapper {
         product.getCompositions().stream().map(this::toCompositionResponse).toList(),
         product.getCategory(),
         collectionName,
-        product.getCareInstructions().stream().map(this::toCareResponse).toList(),
+        product.getCareInstructions(),
         product.getColors().stream().map(this::toDetailsColorResponse).toList());
   }
 
@@ -179,8 +150,6 @@ public interface ProductMapper {
   ProductImageResponseDTO toImageResponse(ProductImage image);
 
   ProductVariantResponseDTO toVariantResponse(ProductVariant variant);
-
-  ProductCareResponseDTO toCareResponse(ProductCare care);
 
   ProductCompositionResponseDTO toCompositionResponse(ProductComposition composition);
 }

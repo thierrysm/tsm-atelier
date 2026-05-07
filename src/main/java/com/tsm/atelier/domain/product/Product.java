@@ -3,7 +3,9 @@ package com.tsm.atelier.domain.product;
 import com.tsm.atelier.domain.collection.Collection;
 import com.tsm.atelier.shared.BaseEntity;
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,8 +15,8 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
+import jakarta.persistence.Version;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -23,6 +25,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
 import org.hibernate.annotations.SQLDelete;
 
 @Entity
@@ -51,6 +54,7 @@ public class Product extends BaseEntity {
   private BigDecimal price;
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+  @BatchSize(size = 50)
   private List<ProductComposition> compositions = new ArrayList<>();
 
   @Column(nullable = false, length = 20)
@@ -67,12 +71,16 @@ public class Product extends BaseEntity {
   @JoinColumn(name = "collection_id")
   private Collection collection;
 
-  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-  @OrderBy("displayOrder ASC")
-  private List<ProductCare> careInstructions = new ArrayList<>();
+  @ElementCollection
+  @CollectionTable(name = "product_cares", joinColumns = @JoinColumn(name = "product_id"))
+  @Column(name = "care_instruction", nullable = false)
+  private List<String> careInstructions = new ArrayList<>();
 
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+  @BatchSize(size = 50)
   private List<ProductColor> colors = new ArrayList<>();
+
+  @Version private Integer version;
 
   public void addComposition(ProductComposition composition) {
     this.compositions.add(composition);

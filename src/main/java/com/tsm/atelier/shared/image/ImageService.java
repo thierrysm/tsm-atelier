@@ -6,6 +6,8 @@ import com.tsm.atelier.shared.UploadResult;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
@@ -25,6 +27,24 @@ public class ImageService {
 
   public void delete(String url) {
     storageService.delete(url);
+  }
+
+  /**
+   * Deletes the file from storage only after the surrounding DB transaction commits successfully.
+   * If no transaction is active, deletes immediately.
+   */
+  public void deleteAfterCommit(String url) {
+    if (TransactionSynchronizationManager.isSynchronizationActive()) {
+      TransactionSynchronizationManager.registerSynchronization(
+          new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+              storageService.delete(url);
+            }
+          });
+    } else {
+      storageService.delete(url);
+    }
   }
 
   private void validateFile(MultipartFile file) {

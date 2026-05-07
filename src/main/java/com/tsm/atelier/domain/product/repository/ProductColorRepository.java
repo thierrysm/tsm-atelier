@@ -11,4 +11,12 @@ public interface ProductColorRepository extends JpaRepository<ProductColor, Long
   List<ProductColor> findAllByProductId(Long productId);
 
   Optional<ProductColor> findByIdAndProductId(Long id, Long productId);
+
+  boolean existsByProductIdAndNameIgnoreCase(Long productId, String name);
+
+  boolean existsByProductIdAndHexCodeIgnoreCase(Long productId, String hexCode);
+
+  boolean existsByProductIdAndNameIgnoreCaseAndIdNot(Long productId, String name, Long id);
+
+  boolean existsByProductIdAndHexCodeIgnoreCaseAndIdNot(Long productId, String hexCode, Long id);
 }
