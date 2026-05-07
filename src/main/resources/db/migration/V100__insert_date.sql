@@ -94,53 +94,38 @@ VALUES
 -- ─── Composition Materials ────────────────────────────────────────────────────
 INSERT INTO composition_materials (composition_id, name, percentage)
 VALUES
-    -- Vestido Linho — External
-    (1, 'Linho',     97),
-    (1, 'Elastano',  3),
-    -- Vestido Linho — Internal
-    (2, 'Acetato',   76),
-    (2, 'Seda',      24),
-    -- Blusa Seda — External
-    (3, 'Seda',      100),
-    -- Calça Alfaiataria — External
-    (4, 'Poliéster', 65),
-    (4, 'Viscose',   33),
-    (4, 'Elastano',  2),
-    -- Casaco Lã — External
-    (5, 'Lã Merino', 90),
-    (5, 'Poliamida', 10),
-    -- Casaco Lã — Internal
-    (6, 'Seda',      100),
-    -- Vestido Midi — External
-    (7, 'Viscose',   95),
-    (7, 'Elastano',  5),
-    -- Conjunto Linho — External
-    (8, 'Linho',     100),
-    -- Conjunto Linho — Internal
-    (9, 'Algodão',   100);
+    (1, 'Linho', 100),
+    (2, 'Algodão', 100),
+    (3, 'Seda', 100),
+    (4, 'Lã', 95), (4, 'Elastano', 5),
+    (5, 'Lã Merino', 100),
+    (6, 'Seda', 100),
+    (7, 'Viscose', 80), (7, 'Linho', 20),
+    (8, 'Linho', 100),
+    (9, 'Algodão', 100);
 
 -- ─── Product Cares ────────────────────────────────────────────────────────────
-INSERT INTO product_cares (product_id, instruction, display_order)
+INSERT INTO product_cares (product_id, care_instruction)
 VALUES
-    (1, 'Lavar à mão com água fria',               1),
-    (1, 'Não utilizar alvejante',                  2),
-    (1, 'Passar a ferro em temperatura máx. 110°C', 3),
-    (1, 'Não secar na secadora',                   4),
-    (2, 'Lavar à mão com sabão neutro',            1),
-    (2, 'Não torcer',                              2),
-    (2, 'Secar à sombra',                          3),
-    (3, 'Lavar a seco',                            1),
-    (3, 'Não molhar',                              2),
-    (3, 'Passar a ferro no avesso',                3),
-    (4, 'Lavar a seco somente',                    1),
-    (4, 'Não lavar em máquina',                    2),
-    (4, 'Guardar em cabide',                       3),
-    (5, 'Lavar à mão com água fria',               1),
-    (5, 'Não utilizar alvejante',                  2),
-    (5, 'Secar à sombra',                          3),
-    (6, 'Lavar à mão',                             1),
-    (6, 'Não torcer',                              2),
-    (6, 'Passar a ferro levemente úmido',          3);
+    (1, 'Lavar à mão com água fria'),
+    (1, 'Não utilizar alvejante'),
+    (1, 'Passar a ferro em temperatura máx. 110°C'),
+    (1, 'Não secar na secadora'),
+    (2, 'Lavar à mão com sabão neutro'),
+    (2, 'Não torcer'),
+    (2, 'Secar à sombra'),
+    (3, 'Lavar a seco'),
+    (3, 'Não molhar'),
+    (3, 'Passar a ferro no avesso'),
+    (4, 'Lavar a seco somente'),
+    (4, 'Não lavar em máquina'),
+    (4, 'Guardar em cabide'),
+    (5, 'Lavar à mão com água fria'),
+    (5, 'Não utilizar alvejante'),
+    (5, 'Secar à sombra'),
+    (6, 'Lavar à mão'),
+    (6, 'Não torcer'),
+    (6, 'Passar a ferro levemente úmido');
 
 -- ─── Media Assets ────────────────────────────────────────────────────────────
 
