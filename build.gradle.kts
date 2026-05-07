@@ -32,7 +32,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-actuator")
 	implementation("org.springframework.boot:spring-boot-starter-data-redis")
 	implementation("org.springframework.boot:spring-boot-starter-flyway")
-	implementation("org.flywaydb:flyway-database-postgresql:12.1.1")
+	implementation("org.flywaydb:flyway-database-postgresql:12.5.0")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jdk8")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
