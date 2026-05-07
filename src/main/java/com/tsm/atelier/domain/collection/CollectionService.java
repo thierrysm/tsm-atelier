@@ -58,10 +58,15 @@ public class CollectionService {
   @Transactional
   public CollectionResponseDTO create(CollectionRequestDTO request) {
     if (collectionRepository.existsByName(request.name())) {
-      throw new EntityAlreadyExistsException("Collection", "name", request.name());
+      throw new EntityAlreadyExistsException("Coleção", "nome", request.name());
     }
+
     Collection collection = collectionMapper.toEntity(request);
     collection.setSlug(generateUniqueSlug(request.name()));
+
+    if (Boolean.TRUE.equals(collection.getShowInHeader())) {
+      collectionRepository.unsetAllShowInHeader();
+    }
 
     return collectionMapper.toResponse(collectionRepository.save(collection));
   }
@@ -71,7 +76,7 @@ public class CollectionService {
     Collection collection =
         collectionRepository
             .findById(id)
-            .orElseThrow(() -> new EntityNotFoundException("Collection", "id", id));
+            .orElseThrow(() -> new EntityNotFoundException("Coleção", "id", id));
 
     request
         .name()
@@ -79,16 +84,23 @@ public class CollectionService {
             newName -> {
               if (!collection.getName().equals(newName)) {
                 if (collectionRepository.existsByName(newName)) {
-                  throw new EntityAlreadyExistsException("Product", "name", newName);
+                  throw new EntityAlreadyExistsException("Coleção", "nome", newName);
                 }
                 collection.setName(newName);
                 collection.setSlug(generateUniqueSlug(newName));
               }
             });
     request.description().ifPresent(collection::setDescription);
-    request.status().ifPresent(collection::setStatus);
     request.featured().ifPresent(collection::setFeatured);
-    request.showInHeader().ifPresent(collection::setShowInHeader);
+    request
+        .showInHeader()
+        .ifPresent(
+            showInHeader -> {
+              collection.setShowInHeader(showInHeader);
+              if (showInHeader) {
+                collectionRepository.unsetShowInHeaderForOthers(id);
+              }
+            });
     request.isNew().ifPresent(collection::setIsNew);
     request.displayOrder().ifPresent(collection::setDisplayOrder);
 
@@ -102,13 +114,18 @@ public class CollectionService {
             .findById(collectionId)
             .orElseThrow(() -> new EntityNotFoundException("Collection", "id", collectionId));
 
-    if (collection.getImageUrl() != null) {
-      imageService.delete(collection.getImageUrl());
-    }
+    String previousUrl = collection.getImageUrl();
 
     UploadResult result = imageService.upload(file, ImageFolder.COLLECTIONS);
     collection.setImageUrl(result.url());
-    return collectionMapper.toResponse(collectionRepository.save(collection));
+    CollectionResponseDTO response =
+        collectionMapper.toResponse(collectionRepository.save(collection));
+
+    if (previousUrl != null) {
+      imageService.deleteAfterCommit(previousUrl);
+    }
+
+    return response;
   }
 
   @Transactional
@@ -181,8 +198,14 @@ public class CollectionService {
       throw new BusinessException("A coleção não está arquivada.");
     }
 
-    collection.setStatus(CollectionStatus.ACTIVE);
+    CollectionStatus restoredStatus =
+        StringUtils.hasText(collection.getImageUrl())
+            ? CollectionStatus.ACTIVE
+            : CollectionStatus.DRAFT;
+    collection.setStatus(restoredStatus);
     collection.setDisabledAt(null);
+
+    productRepository.unarchiveAllByCollectionId(collection.getId());
 
     return collectionMapper.toResponse(collectionRepository.save(collection));
   }

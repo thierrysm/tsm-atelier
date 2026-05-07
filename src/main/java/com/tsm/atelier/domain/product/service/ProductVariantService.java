@@ -10,7 +10,6 @@ import com.tsm.atelier.domain.product.dto.v1.response.ProductVariantResponseDTO;
 import com.tsm.atelier.domain.product.mapper.ProductMapper;
 import com.tsm.atelier.domain.product.repository.ProductColorRepository;
 import com.tsm.atelier.domain.product.repository.ProductVariantRepository;
-import com.tsm.atelier.exception.BusinessException;
 import com.tsm.atelier.exception.EntityAlreadyExistsException;
 import com.tsm.atelier.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -52,7 +51,9 @@ public class ProductVariantService {
             .findByIdAndProductColorIdAndProductColorProductId(variantId, colorId, productId)
             .orElseThrow(() -> new EntityNotFoundException("Variante de produto", "id", variantId));
 
-    request.stock().ifPresent(variant::setStock);
+    if (request.stock() != null) {
+      variant.setStock(request.stock());
+    }
 
     return productMapper.toVariantResponse(productVariantRepository.save(variant));
   }
@@ -62,20 +63,16 @@ public class ProductVariantService {
 
     ProductVariant variantToDelete =
         productVariantRepository
-            .findById(variantId)
+            .findByIdAndProductColorIdAndProductColorProductId(variantId, productColorId, productId)
             .orElseThrow(() -> new EntityNotFoundException("Variante do produto", "id", variantId));
 
     ProductColor parentColor = variantToDelete.getProductColor();
     Product parentProduct = parentColor.getProduct();
 
-    if (!parentColor.getId().equals(productColorId) || !parentProduct.getId().equals(productId)) {
-      throw new BusinessException(
-          "A variante informada não pertence à cor ou ao produto especificado na URL.");
-    }
-
+    productVariantRepository.delete(variantToDelete);
     parentColor.getVariants().removeIf(variant -> variant.getId().equals(variantId));
 
-    if (parentColor.getVariants().isEmpty()) {
+    if (parentColor.getVariants().isEmpty() && parentProduct.getStatus() == ProductStatus.ACTIVE) {
       parentProduct.setStatus(ProductStatus.DRAFT);
     }
   }

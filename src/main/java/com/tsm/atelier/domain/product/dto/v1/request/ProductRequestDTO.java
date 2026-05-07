@@ -17,4 +17,4 @@ public record ProductRequestDTO(
     @NotNull ProductCategory category,
     Long collectionId,
     @NotNull @Valid List<ProductCompositionRequestDTO> compositions,
-    @NotEmpty @Valid List<ProductCareRequestDTO> careInstructions) {}
+    @NotEmpty @Valid List<String> careInstructions) {}

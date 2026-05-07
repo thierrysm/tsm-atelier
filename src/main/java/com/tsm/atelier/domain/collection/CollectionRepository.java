@@ -29,4 +29,13 @@ public interface CollectionRepository extends JpaRepository<Collection, Long> {
   Boolean existsByName(String name);
 
   Boolean existsBySlug(String slug);
+
+  @org.springframework.data.jpa.repository.Modifying
+  @Query("UPDATE Collection c SET c.showInHeader = false WHERE c.showInHeader = true")
+  void unsetAllShowInHeader();
+
+  @org.springframework.data.jpa.repository.Modifying
+  @Query(
+      "UPDATE Collection c SET c.showInHeader = false WHERE c.id != :id AND c.showInHeader = true")
+  void unsetShowInHeaderForOthers(@Param("id") Long id);
 }

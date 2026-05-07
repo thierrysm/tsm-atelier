@@ -2,12 +2,10 @@ package com.tsm.atelier.factory;
 
 import com.tsm.atelier.domain.collection.Collection;
 import com.tsm.atelier.domain.product.Product;
-import com.tsm.atelier.domain.product.ProductCare;
 import com.tsm.atelier.domain.product.ProductCategory;
 import com.tsm.atelier.domain.product.ProductColor;
 import com.tsm.atelier.domain.product.ProductComposition;
 import com.tsm.atelier.domain.product.ProductStatus;
-import com.tsm.atelier.domain.product.dto.v1.request.ProductCareRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductCompositionRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductPatchDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductRequestDTO;
@@ -28,14 +26,19 @@ public class ProductTestFactory {
 
   public static class ProductRequestBuilder {
     private String name = "Vestido Linho Premium";
+    private String slug = "vestido-linho-premium";
     private String description = "Vestido confeccionado em linho premium.";
     private BigDecimal price = BigDecimal.valueOf(299.90);
     private ProductCategory category = ProductCategory.VESTIDOS;
     private Long collectionId = 1L;
     private List<ProductCompositionRequestDTO> compositions =
         List.of(ProductCompositionTestFactory.aProductCompositionRequest());
-    private List<ProductCareRequestDTO> careInstructions =
-        List.of(ProductCareTestFactory.aCareRequest());
+    private List<String> careInstructions =
+        new ArrayList<>(
+            List.of(
+                "Lavar à mão com água fria",
+                "Não utilizar alvejante",
+                "Passar a ferro em temperatura máx. 110°C"));
 
     public ProductRequestBuilder withoutCollection() {
       this.collectionId = null;
@@ -78,7 +81,7 @@ public class ProductTestFactory {
     private ProductStatus status = ProductStatus.ACTIVE;
     private Collection collection = CollectionTestFactory.aCollection().build();
     private List<ProductColor> colors = new ArrayList<>();
-    private List<ProductCare> careInstructions = new ArrayList<>();
+    private List<String> careInstructions = new ArrayList<>();
     private List<ProductComposition> compositions = new ArrayList<>();
 
     public ProductBuilder withId(Long id) {
@@ -88,6 +91,11 @@ public class ProductTestFactory {
 
     public ProductBuilder withName(String name) {
       this.name = name;
+      return this;
+    }
+
+    public ProductBuilder withSlug(String slug) {
+      this.slug = slug;
       return this;
     }
 
@@ -103,6 +111,11 @@ public class ProductTestFactory {
 
     public ProductBuilder withColors(List<ProductColor> colors) {
       this.colors = colors;
+      return this;
+    }
+
+    public ProductBuilder withCompositions(List<ProductComposition> compositions) {
+      this.compositions = compositions;
       return this;
     }
 

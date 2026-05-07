@@ -1,7 +1,6 @@
 package com.tsm.atelier.factory;
 
 import com.tsm.atelier.domain.product.CompositionMaterial;
-import com.tsm.atelier.domain.product.ProductComposition;
 import com.tsm.atelier.domain.product.dto.v1.request.CompositionMaterialRequestDTO;
 
 public class CompositionMaterialTestFactory {
@@ -15,15 +14,8 @@ public class CompositionMaterialTestFactory {
   }
 
   public static class CompositionMaterialBuilder {
-    private Long id = 1L;
     private String name = "Linho";
-    private Integer percentage = 97;
-    private ProductComposition composition = null;
-
-    public CompositionMaterialBuilder withId(Long id) {
-      this.id = id;
-      return this;
-    }
+    private Integer percentage = 93;
 
     public CompositionMaterialBuilder withName(String name) {
       this.name = name;
@@ -35,18 +27,10 @@ public class CompositionMaterialTestFactory {
       return this;
     }
 
-    public CompositionMaterialBuilder withComposition(ProductComposition composition) {
-      this.composition = composition;
-      return this;
-    }
-
     public CompositionMaterial build() {
-      CompositionMaterial material = new CompositionMaterial();
-      material.setId(id);
-      material.setName(name);
-      material.setPercentage(percentage);
-      material.setComposition(composition);
-      return material;
+      String name = this.name;
+      Integer percentage = this.percentage;
+      return new CompositionMaterial(name, percentage);
     }
   }
 }

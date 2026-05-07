@@ -26,8 +26,11 @@ public class ProductImage {
   @Column(length = 100, nullable = false)
   private String fileName;
 
+  @Column(nullable = false)
   private Integer displayOrder;
-  private Boolean isCover;
+
+  @Column(nullable = false)
+  private Boolean isCover = false;
 
   @ManyToOne
   @JoinColumn(name = "product_color_id", nullable = false)

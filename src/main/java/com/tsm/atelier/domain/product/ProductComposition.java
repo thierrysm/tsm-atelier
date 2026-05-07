@@ -1,7 +1,8 @@
 package com.tsm.atelier.domain.product;
 
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
 import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,7 +11,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,15 +31,13 @@ public class ProductComposition {
   @Column(nullable = false)
   private CompositionType type;
 
-  @OneToMany(mappedBy = "composition", cascade = CascadeType.ALL, orphanRemoval = true)
+  @ElementCollection
+  @CollectionTable(
+      name = "composition_materials",
+      joinColumns = @JoinColumn(name = "composition_id"))
   private List<CompositionMaterial> materials = new ArrayList<>();
 
   @ManyToOne
   @JoinColumn(name = "product_id")
   private Product product;
-
-  public void addMaterial(CompositionMaterial material) {
-    this.materials.add(material);
-    material.setComposition(this);
-  }
 }
