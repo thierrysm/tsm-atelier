@@ -11,9 +11,24 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Long
 
   Optional<ProductImage> findByIdAndProductColorId(Long id, Long productColorId);
 
+  boolean existsByIdAndProductColorId(Long id, Long productColorId);
+
+  Optional<ProductImage> findFirstByProductColorIdAndIdNotOrderByDisplayOrderAsc(
+      Long productColorId, Long excludedId);
+
   int countByProductColorId(Long productColorId);
 
-  @Modifying
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
   @Query("UPDATE ProductImage i SET i.isCover = false WHERE i.productColor.id = :colorId")
   void removeCoversFromColor(@Param("colorId") Long colorId);
+
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query(
+      "UPDATE ProductImage i SET i.isCover = false "
+          + "WHERE i.productColor.id = :colorId AND i.id <> :imageId")
+  void clearCoversExcept(@Param("colorId") Long colorId, @Param("imageId") Long imageId);
+
+  @Modifying(clearAutomatically = true, flushAutomatically = true)
+  @Query("UPDATE ProductImage i SET i.isCover = true WHERE i.id = :imageId")
+  void markAsCover(@Param("imageId") Long imageId);
 }

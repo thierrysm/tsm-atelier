@@ -6,7 +6,8 @@ import jakarta.validation.constraints.Size;
 
 public record ProductColorRequestDTO(
     @NotBlank @Size(max = 50) String name,
-    @Pattern(
+    @NotBlank
+        @Pattern(
             regexp = "^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$",
-            message = "Must be a valid hex color code")
+            message = "Deve ser um código de cor hexadecimal válido")
         String hexCode) {}

@@ -3,17 +3,34 @@ package com.tsm.atelier.exception.handler;
 import com.tsm.atelier.exception.BusinessException;
 import com.tsm.atelier.exception.EntityAlreadyExistsException;
 import com.tsm.atelier.exception.EntityNotFoundException;
+import com.tsm.atelier.exception.RateLimitExceededException;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Instant;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   @ExceptionHandler(MaxUploadSizeExceededException.class)
   public ResponseEntity<ApiError> handleMaxUploadSizeExceededException(
@@ -60,9 +77,9 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(409).body(error);
   }
 
-  @ExceptionHandler(org.springframework.web.bind.MethodArgumentNotValidException.class)
+  @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ApiError> handleValidationException(
-      org.springframework.web.bind.MethodArgumentNotValidException ex, HttpServletRequest request) {
+      MethodArgumentNotValidException ex, HttpServletRequest request) {
     java.util.List<ApiError.FieldError> fieldErrors =
         ex.getBindingResult().getFieldErrors().stream()
             .map(error -> new ApiError.FieldError(error.getField(), error.getDefaultMessage()))
@@ -80,14 +97,134 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(400).body(error);
   }
 
+  @ExceptionHandler(io.jsonwebtoken.JwtException.class)
+  public ResponseEntity<ApiError> handleJwtException(
+      io.jsonwebtoken.JwtException ex, HttpServletRequest request) {
+    ApiError error =
+        new ApiError(
+            401,
+            "Não Autorizado",
+            ex.getClass().getName(),
+            "Token JWT inválido ou expirado.",
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(401).body(error);
+  }
+
+  // Login failures convergem para a MESMA resposta para evitar
+  // enumeração de usuários (existe? está ativo? está bloqueado?).
+  // O motivo real fica nos logs para auditoria interna.
+  @ExceptionHandler({
+    BadCredentialsException.class,
+    DisabledException.class,
+    LockedException.class,
+    UsernameNotFoundException.class
+  })
+  public ResponseEntity<ApiError> handleAuthFailure(
+      AuthenticationException ex, HttpServletRequest request) {
+    log.warn(
+        "Falha de autenticação em {}: {}", request.getRequestURI(), ex.getClass().getSimpleName());
+    ApiError error =
+        new ApiError(
+            401,
+            "Não Autorizado",
+            ex.getClass().getName(),
+            "Email ou senha inválidos",
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(401).body(error);
+  }
+
+  @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+  public ResponseEntity<ApiError> handleOptimisticLock(
+      ObjectOptimisticLockingFailureException ex, HttpServletRequest request) {
+    log.warn(
+        "Conflito de versão (optimistic lock) em {}: {}", request.getRequestURI(), ex.getMessage());
+    ApiError error =
+        new ApiError(
+            HttpStatus.CONFLICT.value(),
+            "Conflito de Concorrência",
+            ex.getClass().getName(),
+            "O recurso foi modificado por outra requisição. Tente novamente.",
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<ApiError> handleDataIntegrityViolation(
+      DataIntegrityViolationException ex, HttpServletRequest request) {
+    log.warn(
+        "Violação de integridade de dados em {}: {}", request.getRequestURI(), ex.getMessage());
+    ApiError error =
+        new ApiError(
+            HttpStatus.CONFLICT.value(),
+            "Conflito",
+            ex.getClass().getName(),
+            "Não foi possível concluir a operação. Pode haver um valor duplicado ou uma referência inválida.",
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
+  }
+
+  @ExceptionHandler(HttpMessageNotReadableException.class)
+  public ResponseEntity<ApiError> handleHttpMessageNotReadable(
+      HttpMessageNotReadableException ex, HttpServletRequest request) {
+    ApiError error =
+        new ApiError(
+            HttpStatus.BAD_REQUEST.value(),
+            "Requisição Inválida",
+            ex.getClass().getName(),
+            "Corpo da requisição malformado ou JSON inválido.",
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+  public ResponseEntity<ApiError> handleTypeMismatch(
+      MethodArgumentTypeMismatchException ex, HttpServletRequest request) {
+    ApiError error =
+        new ApiError(
+            HttpStatus.BAD_REQUEST.value(),
+            "Parâmetro Inválido",
+            ex.getClass().getName(),
+            "O parâmetro '" + ex.getName() + "' possui um valor inválido.",
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(AccessDeniedException.class)
+  public ResponseEntity<ApiError> handleAccessDenied(
+      AccessDeniedException ex, HttpServletRequest request) {
+    ApiError error =
+        new ApiError(
+            HttpStatus.FORBIDDEN.value(),
+            "Acesso Negado",
+            ex.getClass().getName(),
+            "Você não tem permissão para acessar este recurso.",
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+  }
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<ApiError> handleGeneric(Exception ex, HttpServletRequest request) {
+    log.error("Erro inesperado em {}", request.getRequestURI(), ex);
     ApiError error =
         new ApiError(
             500,
             "Erro Interno",
+            ex.getClass().getName(),
             "Ocorreu um erro inesperado. Tente novamente mais tarde.",
-            ex.getMessage(),
             request.getRequestURI(),
             Instant.now(),
             null);
@@ -109,6 +246,22 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(404).body(error);
   }
 
+  @ExceptionHandler(RateLimitExceededException.class)
+  public ResponseEntity<ApiError> handleRateLimit(
+      RateLimitExceededException ex, HttpServletRequest request) {
+    log.warn("Rate limit excedido em {}", request.getRequestURI());
+    ApiError error =
+        new ApiError(
+            HttpStatus.TOO_MANY_REQUESTS.value(),
+            "Muitas Requisições",
+            ex.getClass().getName(),
+            ex.getMessage(),
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS).body(error);
+  }
+
   @ExceptionHandler(BusinessException.class)
   public ResponseEntity<ApiError> handleBusiness(BusinessException ex, HttpServletRequest request) {
     List<ApiError.FieldError> fields =
@@ -122,7 +275,7 @@ public class GlobalExceptionHandler {
             ex.getMessage(),
             request.getRequestURI(),
             Instant.now(),
-            null);
+            fields);
     return ResponseEntity.status(400).body(error);
   }
 }

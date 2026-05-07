@@ -32,7 +32,6 @@ public class ProductCompositionTestFactory {
             List.of(
                 CompositionMaterialTestFactory.aCompositionMaterial().build(),
                 CompositionMaterialTestFactory.aCompositionMaterial()
-                    .withId(2L)
                     .withName("Elastano")
                     .withPercentage(3)
                     .build()));

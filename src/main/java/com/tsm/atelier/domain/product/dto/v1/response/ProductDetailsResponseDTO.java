@@ -15,5 +15,5 @@ public record ProductDetailsResponseDTO(
     List<ProductCompositionResponseDTO> productComposition,
     ProductCategory productCategory,
     String collectionName,
-    List<ProductCareResponseDTO> careInstructions,
+    List<String> careInstructions,
     List<ProductColorDetailsResponseDTO> colors) {}

@@ -51,7 +51,7 @@ public class Collection extends BaseEntity {
   @Column(nullable = false)
   private Boolean featured = false;
 
-  @Column(nullable = false, unique = true)
+  @Column(nullable = false)
   private Boolean showInHeader = false;
 
   @Column(nullable = false)

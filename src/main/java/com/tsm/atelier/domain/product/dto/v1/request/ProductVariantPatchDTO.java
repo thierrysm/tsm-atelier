@@ -1,5 +1,6 @@
 package com.tsm.atelier.domain.product.dto.v1.request;
 
-import java.util.Optional;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 
-public record ProductVariantPatchDTO(Optional<Integer> stock) {}
+public record ProductVariantPatchDTO(@NotNull @Min(0) Integer stock) {}
