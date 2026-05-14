@@ -1,6 +1,5 @@
 package com.tsm.atelier.domain.auth.service;
 
-import com.tsm.atelier.config.ApplicationProperties;
 import com.tsm.atelier.config.SecurityProperties;
 import com.tsm.atelier.domain.auth.EmailVerificationToken;
 import com.tsm.atelier.domain.auth.RefreshToken;
@@ -27,6 +26,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -49,7 +50,7 @@ public class AuthService {
   private final ClientProfileRepository clientProfileRepository;
   private final ApplicationEventPublisher applicationEventPublisher;
   private final EmailVerificationTokenRepository emailVerificationTokenRepository;
-  private final ApplicationProperties applicationProperties;
+  private final UserVerificationService userVerificationService;
 
   @Transactional
   public void register(RegisterRequestDTO request) {
@@ -59,44 +60,39 @@ public class AuthService {
 
     User savedUser = createUser(request);
     createClientProfile(request, savedUser);
-    String token = createVerificationToken(savedUser);
+    String token = userVerificationService.createVerificationToken(savedUser);
 
     applicationEventPublisher.publishEvent(new UserRegisteredEvent(request.email(), token));
   }
 
   @Transactional
-  public void resendVerification(String email) {
-    // Resposta opaca para evitar enumeração de emails registrados:
-    // sempre 204 no controller, side effects apenas se aplicável.
-    userRepository
-        .findByEmail(email)
-        .ifPresent(
-            user -> {
-              if (user.getStatus() == UserStatus.ACTIVE
-                  || Boolean.TRUE.equals(user.getEmailVerified())) {
-                log.info(
-                    "resend-verification ignorado: email já verificado userId={}", user.getId());
-                return;
-              }
-
-              emailVerificationTokenRepository.invalidateActiveByUserId(user.getId());
-              String token = createVerificationToken(user);
-              applicationEventPublisher.publishEvent(new UserRegisteredEvent(email, token));
-            });
-  }
-
-  @Transactional
   public AuthResponseDTO login(LoginRequestDTO request) {
-    Authentication authentication =
-        authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+    try {
+      Authentication authentication =
+          authenticationManager.authenticate(
+              new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-    User user = (User) authentication.getPrincipal();
+      User user = (User) authentication.getPrincipal();
 
-    String accessToken = jwtService.generateAccessToken(user);
-    String refreshToken = saveRefreshToken(user, UUID.randomUUID());
+      String accessToken = jwtService.generateAccessToken(user);
+      String refreshToken = saveRefreshToken(user, UUID.randomUUID());
 
-    return new AuthResponseDTO(accessToken, refreshToken);
+      return new AuthResponseDTO(accessToken, refreshToken);
+    } catch (DisabledException ex) {
+      User user =
+          userRepository
+              .findByEmail(request.email())
+              .orElseThrow(() -> new BadCredentialsException("Email ou senha inválidos"));
+
+      if (!passwordEncoder.matches(request.password(), user.getPassword())) {
+        log.warn("Tentativa de login em conta inativa com senha incorreta: {}", request.email());
+        throw new BadCredentialsException("Email ou senha inválidos");
+      }
+
+      log.info("Login falhou - conta inativa. Disparando reenvio para: {}", request.email());
+      userVerificationService.resendVerification(request.email());
+      throw ex;
+    }
   }
 
   @Transactional
@@ -108,8 +104,6 @@ public class AuthService {
             .orElseThrow(() -> new BusinessException(GENERIC_REFRESH_ERROR));
 
     if (Boolean.TRUE.equals(stored.getRevoked())) {
-      // Apresentação de token revogado = sinal de comprometimento.
-      // Mata a família inteira para invalidar a sessão do atacante.
       refreshTokenRepository.revokeFamily(stored.getFamilyId());
       log.warn(
           "REFRESH_TOKEN_REUSE_DETECTED userId={} family={}",
@@ -195,20 +189,5 @@ public class AuthService {
     profile.setFirstName(request.firstName());
     profile.setLastName(request.lastName());
     clientProfileRepository.save(profile);
-  }
-
-  private String createVerificationToken(User user) {
-    String token = UUID.randomUUID().toString();
-    Instant expiresAt =
-        Instant.now().plusSeconds(applicationProperties.emailVerificationExpiration());
-
-    EmailVerificationToken verificationToken = new EmailVerificationToken();
-    verificationToken.setToken(token);
-    verificationToken.setUser(user);
-    verificationToken.setExpiresAt(expiresAt);
-    verificationToken.setUsed(false);
-
-    emailVerificationTokenRepository.save(verificationToken);
-    return token;
   }
 }

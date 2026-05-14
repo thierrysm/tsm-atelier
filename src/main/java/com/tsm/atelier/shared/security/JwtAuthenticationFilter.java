@@ -50,13 +50,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       String email = jwtService.extractEmail(claims);
       Role role = jwtService.extractRole(claims);
 
-      // Criamos um usuário "stateless" apenas com os dados do token.
-      // Isso evita o hit no banco e mantém a compatibilidade com @AuthenticationPrincipal User.
       User user = new User();
       user.setId(userId);
       user.setEmail(email);
       user.setRole(role);
-      user.setStatus(UserStatus.ACTIVE); // Se o token é válido, assumimos ativo.
+      user.setStatus(UserStatus.ACTIVE);
       user.setEmailVerified(true);
 
       UsernamePasswordAuthenticationToken authentication =

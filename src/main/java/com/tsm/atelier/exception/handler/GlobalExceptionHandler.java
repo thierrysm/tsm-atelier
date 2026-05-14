@@ -112,12 +112,8 @@ public class GlobalExceptionHandler {
     return ResponseEntity.status(401).body(error);
   }
 
-  // Login failures convergem para a MESMA resposta para evitar
-  // enumeração de usuários (existe? está ativo? está bloqueado?).
-  // O motivo real fica nos logs para auditoria interna.
   @ExceptionHandler({
     BadCredentialsException.class,
-    DisabledException.class,
     LockedException.class,
     UsernameNotFoundException.class
   })
@@ -135,6 +131,22 @@ public class GlobalExceptionHandler {
             Instant.now(),
             null);
     return ResponseEntity.status(401).body(error);
+  }
+
+  @ExceptionHandler(DisabledException.class)
+  public ResponseEntity<ApiError> handleDisabledAccount(
+      DisabledException ex, HttpServletRequest request) {
+    log.info("Tentativa de login em conta não ativada: {}", request.getRequestURI());
+    ApiError error =
+        new ApiError(
+            403,
+            "Conta Não Ativada",
+            ex.getClass().getName(),
+            "Sua conta ainda não foi confirmada. Enviamos um novo e-mail de ativação para você.",
+            request.getRequestURI(),
+            Instant.now(),
+            null);
+    return ResponseEntity.status(403).body(error);
   }
 
   @ExceptionHandler(ObjectOptimisticLockingFailureException.class)

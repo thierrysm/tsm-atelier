@@ -8,6 +8,7 @@ import com.tsm.atelier.domain.auth.dto.v1.request.ResendVerificationRequestDTO;
 import com.tsm.atelier.domain.auth.dto.v1.response.AccessTokenResponseDTO;
 import com.tsm.atelier.domain.auth.dto.v1.response.AuthResponseDTO;
 import com.tsm.atelier.domain.auth.service.AuthService;
+import com.tsm.atelier.domain.auth.service.UserVerificationService;
 import com.tsm.atelier.exception.BusinessException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -35,6 +36,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
   private final AuthService authService;
+  private final UserVerificationService userVerificationService;
   private final SecurityProperties properties;
 
   private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
@@ -78,7 +80,7 @@ public class AuthController {
   @PostMapping("/resend-verification")
   public ResponseEntity<Void> resendVerification(
       @Valid @RequestBody ResendVerificationRequestDTO request) {
-    authService.resendVerification(request.email());
+    userVerificationService.resendVerification(request.email());
     return ResponseEntity.noContent().build();
   }
 

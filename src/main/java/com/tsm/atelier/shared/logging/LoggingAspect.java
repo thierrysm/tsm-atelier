@@ -68,7 +68,6 @@ public class LoggingAspect {
             arg -> {
               if (arg == null) return "null";
 
-              // Se for coleção, loga apenas o tamanho
               if (arg instanceof Collection<?> c) {
                 return "[Collection size: " + c.size() + "]";
               }

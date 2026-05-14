@@ -171,25 +171,6 @@ class AuthControllerTest {
           .andExpect(jsonPath("$.error").value("Não Autorizado"))
           .andExpect(jsonPath("$.message").value("Email ou senha inválidos"));
     }
-
-    @Test
-    @DisplayName("Conta desativada também retorna mensagem genérica (anti-enumeration)")
-    void shouldReturnGenericMessageWhenAccountIsDisabled() throws Exception {
-      // Arrange
-      LoginRequestDTO request = AuthTestFactory.aLoginRequest().build();
-      doThrow(new org.springframework.security.authentication.DisabledException("disabled"))
-          .when(authService)
-          .login(any(LoginRequestDTO.class));
-
-      // Act & Assert
-      mockMvc
-          .perform(
-              post("/api/v1/auth/login")
-                  .contentType(MediaType.APPLICATION_JSON)
-                  .content(objectMapper.writeValueAsString(request)))
-          .andExpect(status().isUnauthorized())
-          .andExpect(jsonPath("$.message").value("Email ou senha inválidos"));
-    }
   }
 
   @Nested

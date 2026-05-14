@@ -41,6 +41,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -59,6 +61,7 @@ class AuthServiceTest {
   @Mock private AuthenticationManager authenticationManager;
   @Mock private JwtService jwtService;
   @Mock private SecurityProperties securityProperties;
+  @Mock private UserVerificationService userVerificationService;
 
   @InjectMocks private AuthService authService;
 
@@ -80,7 +83,8 @@ class AuthServiceTest {
       when(userRepository.existsByEmail(request.email())).thenReturn(false);
       when(passwordEncoder.encode(request.password())).thenReturn("hashed_password");
       when(userRepository.save(any(User.class))).thenReturn(mockUser);
-      when(applicationProperties.emailVerificationExpiration()).thenReturn(14400L);
+      when(userVerificationService.createVerificationToken(mockUser))
+          .thenReturn("verification_token");
 
       // Act
       authService.register(request);
@@ -88,7 +92,7 @@ class AuthServiceTest {
       // Assert
       verify(userRepository).save(any(User.class));
       verify(clientProfileRepository).save(any(ClientProfile.class));
-      verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
+      verify(userVerificationService).createVerificationToken(mockUser);
       verify(eventPublisher).publishEvent(any(UserRegisteredEvent.class));
     }
 
@@ -102,7 +106,6 @@ class AuthServiceTest {
       when(userRepository.existsByEmail(any())).thenReturn(false);
       when(passwordEncoder.encode(any())).thenReturn("hashed_password");
       when(userRepository.save(any(User.class))).thenReturn(mockUser);
-      when(applicationProperties.emailVerificationExpiration()).thenReturn(14400L);
 
       // Act
       authService.register(request);
@@ -121,7 +124,6 @@ class AuthServiceTest {
       when(userRepository.existsByEmail(any())).thenReturn(false);
       when(passwordEncoder.encode(any())).thenReturn("hashed_password");
       when(userRepository.save(any(User.class))).thenReturn(mockUser);
-      when(applicationProperties.emailVerificationExpiration()).thenReturn(14400L);
 
       // Act
       authService.register(request);
@@ -141,7 +143,6 @@ class AuthServiceTest {
       when(userRepository.existsByEmail(any())).thenReturn(false);
       when(passwordEncoder.encode("senha123")).thenReturn("hashed_senha123");
       when(userRepository.save(any(User.class))).thenReturn(mockUser);
-      when(applicationProperties.emailVerificationExpiration()).thenReturn(14400L);
 
       // Act
       authService.register(request);
@@ -193,7 +194,6 @@ class AuthServiceTest {
       when(userRepository.existsByEmail(any())).thenReturn(false);
       when(passwordEncoder.encode(any())).thenReturn("hashed_password");
       when(userRepository.save(any())).thenReturn(mockUser);
-      when(applicationProperties.emailVerificationExpiration()).thenReturn(14400L);
 
       // Act
       authService.register(request);
@@ -205,77 +205,6 @@ class AuthServiceTest {
                   profile ->
                       profile.getFirstName().equals("João")
                           && profile.getLastName().equals("Silva")));
-    }
-  }
-
-  @Nested
-  @DisplayName("Reenviar verificação")
-  class ResendVerification {
-
-    @Test
-    @DisplayName(
-        "Deve invalidar tokens antigos, criar novo e publicar evento para usuário INACTIVE")
-    void shouldInvalidateOldTokensAndPublishEventForInactiveUser() {
-      // Arrange
-      User user =
-          AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).withEmailVerified(false).build();
-      when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-      when(applicationProperties.emailVerificationExpiration()).thenReturn(14400L);
-
-      // Act
-      authService.resendVerification(user.getEmail());
-
-      // Assert
-      verify(emailVerificationTokenRepository).invalidateActiveByUserId(user.getId());
-      verify(emailVerificationTokenRepository).save(any(EmailVerificationToken.class));
-      verify(eventPublisher)
-          .publishEvent(argThat((UserRegisteredEvent ev) -> ev.email().equals(user.getEmail())));
-    }
-
-    @Test
-    @DisplayName("Não deve fazer nada quando usuário não é encontrado (resposta opaca)")
-    void shouldDoNothingWhenUserNotFound() {
-      // Arrange
-      when(userRepository.findByEmail("nao-existe@email.com")).thenReturn(Optional.empty());
-
-      // Act
-      authService.resendVerification("nao-existe@email.com");
-
-      // Assert
-      verify(emailVerificationTokenRepository, never()).invalidateActiveByUserId(any());
-      verify(emailVerificationTokenRepository, never()).save(any());
-      verify(eventPublisher, never()).publishEvent(any());
-    }
-
-    @Test
-    @DisplayName("Não deve reenviar quando usuário já está ACTIVE")
-    void shouldNotResendWhenUserIsActive() {
-      // Arrange
-      User user = AuthTestFactory.aUser().withStatus(UserStatus.ACTIVE).build();
-      when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-
-      // Act
-      authService.resendVerification(user.getEmail());
-
-      // Assert
-      verify(emailVerificationTokenRepository, never()).invalidateActiveByUserId(any());
-      verify(eventPublisher, never()).publishEvent(any());
-    }
-
-    @Test
-    @DisplayName("Não deve reenviar quando emailVerified=true (mesmo se status difere)")
-    void shouldNotResendWhenEmailAlreadyVerified() {
-      // Arrange
-      User user =
-          AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).withEmailVerified(true).build();
-      when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
-
-      // Act
-      authService.resendVerification(user.getEmail());
-
-      // Assert
-      verify(emailVerificationTokenRepository, never()).invalidateActiveByUserId(any());
-      verify(eventPublisher, never()).publishEvent(any());
     }
   }
 
@@ -330,6 +259,46 @@ class AuthServiceTest {
                           && !token.getRevoked()
                           && token.getFamilyId() != null
                           && token.getUser().equals(user)));
+    }
+
+    @Test
+    @DisplayName(
+        "Deve disparar reenvio de e-mail quando login falha por conta desabilitada e SENHA CORRETA")
+    void shouldResendVerificationWhenLoginFailsDueToDisabledAccount() {
+      // Arrange
+      LoginRequestDTO request = AuthTestFactory.aLoginRequest().build();
+      User user = AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).build();
+
+      when(authenticationManager.authenticate(any()))
+          .thenThrow(new DisabledException("Conta inativa"));
+      when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(user));
+      when(passwordEncoder.matches(request.password(), user.getPassword())).thenReturn(true);
+
+      // Act & Assert
+      assertThatThrownBy(() -> authService.login(request)).isInstanceOf(DisabledException.class);
+
+      verify(userVerificationService).resendVerification(request.email());
+    }
+
+    @Test
+    @DisplayName(
+        "NÃO deve disparar reenvio de e-mail quando login falha por conta desabilitada mas SENHA INCORRETA")
+    void shouldNotResendVerificationWhenLoginFailsDueToDisabledAccountButWrongPassword() {
+      // Arrange
+      LoginRequestDTO request = AuthTestFactory.aLoginRequest().build();
+      User user = AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).build();
+
+      when(authenticationManager.authenticate(any()))
+          .thenThrow(new DisabledException("Conta inativa"));
+      when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(user));
+      when(passwordEncoder.matches(request.password(), user.getPassword())).thenReturn(false);
+
+      // Act & Assert
+      assertThatThrownBy(() -> authService.login(request))
+          .isInstanceOf(BadCredentialsException.class)
+          .hasMessage("Email ou senha inválidos");
+
+      verify(userVerificationService, never()).resendVerification(any());
     }
   }
 
