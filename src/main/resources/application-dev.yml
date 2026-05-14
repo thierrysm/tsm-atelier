@@ -16,6 +16,26 @@ spring:
     minio:
       access-key: ${MINIO_ACCESS_KEY:atelier}
       secret-key: ${MINIO_SECRET_KEY:atelier123}
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+
+  allowed-origins:
+    "http://localhost:3000"
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: always
+  info:
+    java:
+      enabled: true
+    os:
+      enabled: true
 
 payment:
   stripe:
