@@ -15,6 +15,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.tsm.atelier.domain.product.ProductCategory;
 import com.tsm.atelier.domain.product.ProductStatus;
+import com.tsm.atelier.domain.product.TargetAudience;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductFilterDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductPatchDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductRequestDTO;
@@ -73,9 +74,11 @@ class ProductControllerTest {
         "vestido-linho",
         "Descricao",
         BigDecimal.valueOf(299.90),
-        ProductStatus.ACTIVE,
+        null,
+        ProductStatus.DRAFT,
         List.of(),
         ProductCategory.VESTIDOS,
+        TargetAudience.WOMENSWEAR,
         "Collection Primavera",
         List.of(),
         List.of());
@@ -88,9 +91,11 @@ class ProductControllerTest {
         "vestido-linho",
         "Descricao",
         BigDecimal.valueOf(299.90),
+        null,
         ProductStatus.DRAFT,
         List.of(),
         ProductCategory.VESTIDOS,
+        TargetAudience.WOMENSWEAR,
         "Collection Primavera",
         List.of(),
         List.of());

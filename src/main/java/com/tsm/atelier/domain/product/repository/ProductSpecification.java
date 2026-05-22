@@ -6,6 +6,7 @@ import com.tsm.atelier.domain.product.ProductColor;
 import com.tsm.atelier.domain.product.ProductSize;
 import com.tsm.atelier.domain.product.ProductStatus;
 import com.tsm.atelier.domain.product.ProductVariant;
+import com.tsm.atelier.domain.product.TargetAudience;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import java.math.BigDecimal;
@@ -35,6 +36,15 @@ public class ProductSpecification {
         return null;
       }
       return cb.equal(root.get("category"), category);
+    };
+  }
+
+  public static Specification<Product> hasTargetAudience(TargetAudience targetAudience) {
+    return (root, query, cb) -> {
+      if (targetAudience == null) {
+        return null;
+      }
+      return cb.equal(root.get("targetAudience"), targetAudience);
     };
   }
 
@@ -73,6 +83,19 @@ public class ProductSpecification {
 
       return cb.and(
           cb.equal(variantsJoin.get("size"), size), cb.greaterThan(variantsJoin.get("stock"), 0));
+    };
+  }
+
+  public static Specification<Product> isOnSale(Boolean isOnSale) {
+    return (root, query, cb) -> {
+      if (isOnSale == null) {
+        return null;
+      }
+      if (Boolean.TRUE.equals(isOnSale)) {
+        return cb.isNotNull(root.get("promotionalPrice"));
+      } else {
+        return cb.isNull(root.get("promotionalPrice"));
+      }
     };
   }
 }

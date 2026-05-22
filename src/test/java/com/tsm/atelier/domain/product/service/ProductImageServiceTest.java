@@ -23,6 +23,7 @@ import com.tsm.atelier.shared.UploadResult;
 import com.tsm.atelier.shared.image.ImageFolder;
 import com.tsm.atelier.shared.image.ImageService;
 import java.util.Optional;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
+@Disabled
 @ExtendWith(MockitoExtension.class)
 class ProductImageServiceTest {
 

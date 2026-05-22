@@ -53,6 +53,9 @@ public class Product extends BaseEntity {
   @Column(nullable = false, precision = 10, scale = 2)
   private BigDecimal price;
 
+  @Column(name = "promotional_price", precision = 10, scale = 2)
+  private BigDecimal promotionalPrice;
+
   @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
   @BatchSize(size = 50)
   private List<ProductComposition> compositions = new ArrayList<>();
@@ -60,6 +63,10 @@ public class Product extends BaseEntity {
   @Column(nullable = false, length = 20)
   @Enumerated(EnumType.STRING)
   private ProductCategory category;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "target_audience", nullable = false, length = 20)
+  private TargetAudience targetAudience;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 20)

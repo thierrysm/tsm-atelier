@@ -1,0 +1,8 @@
+ALTER TABLE products
+ADD COLUMN target_audience VARCHAR(20) DEFAULT 'WOMENSWEAR';
+
+ALTER TABLE products
+ALTER COLUMN target_audience DROP DEFAULT;
+
+ALTER TABLE products
+ALTER COLUMN target_audience SET NOT NULL;

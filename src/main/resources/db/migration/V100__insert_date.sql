@@ -9,14 +9,14 @@ VALUES
     ('Edição Limitada', 'edicao-limitada', 'Peças exclusivas em edição limitada para ocasiões especiais.',           '/images/collections/edicao-limitada.jpg', 'DRAFT',  false, false, false, 4);
 
 -- ─── Products ─────────────────────────────────────────────────────────────────
-INSERT INTO products (name, slug, description, price, category, status, collection_id)
+INSERT INTO products (name, slug, description, price, promotional_price, category, target_audience, status, collection_id)
 VALUES
-    ('Vestido Linho Premium',     'vestido-linho-premium',     'Vestido confeccionado em linho premium com corte elegante e moderno.',              299.90, 'VESTIDOS',  'ACTIVE', 1),
-    ('Blusa Seda Floral',         'blusa-seda-floral',         'Blusa em seda natural com estampa floral exclusiva da coleção.',                    189.90, 'CASACOS',   'ACTIVE', 1),
-    ('Calça Alfaiataria',         'calca-alfaiataria',         'Calça de alfaiataria com caimento impecável e tecido de alta gramatura.',           349.90, 'CALCAS',    'ACTIVE', 2),
-    ('Casaco Lã Merino',          'casaco-la-merino',          'Casaco confeccionado em lã merino australiana com forro de seda.',                  599.90, 'CASACOS',   'ACTIVE', 2),
-    ('Vestido Midi Estampado',    'vestido-midi-estampado',    'Vestido midi com estampa exclusiva desenvolvida pelos artistas da coleção.',        259.90, 'VESTIDOS',  'ACTIVE', 3),
-    ('Conjunto Linho Primavera',  'conjunto-linho-primavera',  'Conjunto de calça e blusa em linho com bordados artesanais.',                       459.90, 'CAMISETAS', 'ACTIVE', 3);
+    ('Vestido Linho Premium',     'vestido-linho-premium',     'Vestido confeccionado em linho premium com corte elegante e moderno.',              299.90, NULL,   'VESTIDOS',  'WOMENSWEAR', 'ACTIVE', 1),
+    ('Blusa Seda Floral',         'blusa-seda-floral',         'Blusa em seda natural com estampa floral exclusiva da coleção.',                    189.90, 149.90, 'CASACOS',   'WOMENSWEAR', 'ACTIVE', 1),
+    ('Calça Alfaiataria',         'calca-alfaiataria',         'Calça de alfaiataria com caimento impecável e tecido de alta gramatura.',           349.90, NULL,   'CALCAS',    'WOMENSWEAR', 'ACTIVE', 2),
+    ('Casaco Lã Merino',          'casaco-la-merino',          'Casaco confeccionado em lã merino australiana com forro de seda.',                  599.90, NULL,   'CASACOS',   'WOMENSWEAR', 'ACTIVE', 2),
+    ('Vestido Midi Estampado',    'vestido-midi-estampado',    'Vestido midi com estampa exclusiva desenvolvida pelos artistas da coleção.',        259.90, 199.90, 'VESTIDOS',  'WOMENSWEAR', 'ACTIVE', 3),
+    ('Conjunto Linho Primavera',  'conjunto-linho-primavera',  'Conjunto de calça e blusa em linho com bordados artesanais.',                       459.90, NULL,   'CAMISETAS', 'WOMENSWEAR', 'ACTIVE', 3);
 
 -- ─── Product Colors ───────────────────────────────────────────────────────────
 INSERT INTO product_colors (product_id, name, hex_code)

@@ -9,5 +9,6 @@ public record ProductSummaryResponseDTO(
     Long id,
     String name,
     BigDecimal price,
+    BigDecimal promotionalPrice,
     String coverImageUrl,
     List<ColorSummaryResponseDTO> colors) {}

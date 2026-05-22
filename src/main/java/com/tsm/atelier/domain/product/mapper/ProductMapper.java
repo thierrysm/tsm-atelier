@@ -95,9 +95,11 @@ public interface ProductMapper {
         product.getSlug(),
         product.getDescription(),
         product.getPrice(),
+        product.getPromotionalPrice(),
         product.getStatus(),
         product.getCompositions().stream().map(this::toCompositionResponse).toList(),
         product.getCategory(),
+        product.getTargetAudience(),
         collectionName,
         product.getCareInstructions(),
         product.getColors().stream().map(this::toDetailsColorResponse).toList());
@@ -129,7 +131,12 @@ public interface ProductMapper {
         product.getColors().stream().map(this::toColorSummaryResponse).toList();
 
     return new ProductSummaryResponseDTO(
-        product.getId(), product.getName(), product.getPrice(), coverUrl, colors);
+        product.getId(),
+        product.getName(),
+        product.getPrice(),
+        product.getPromotionalPrice(),
+        coverUrl,
+        colors);
   }
 
   default ColorSummaryResponseDTO toColorSummaryResponse(ProductColor color) {

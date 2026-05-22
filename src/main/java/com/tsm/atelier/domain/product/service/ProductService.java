@@ -155,7 +155,9 @@ public class ProductService {
     request.name().ifPresent(newName -> updateName(product, newName));
     request.description().ifPresent(product::setDescription);
     request.price().ifPresent(product::setPrice);
+    request.promotionalPrice().ifPresent(product::setPromotionalPrice);
     request.category().ifPresent(product::setCategory);
+    request.targetAudience().ifPresent(product::setTargetAudience);
     request.material().ifPresent(newCompositions -> updateCompositions(product, newCompositions));
     request.careInstructions().ifPresent(product::setCareInstructions);
 

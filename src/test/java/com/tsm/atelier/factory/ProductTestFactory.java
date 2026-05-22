@@ -6,6 +6,7 @@ import com.tsm.atelier.domain.product.ProductCategory;
 import com.tsm.atelier.domain.product.ProductColor;
 import com.tsm.atelier.domain.product.ProductComposition;
 import com.tsm.atelier.domain.product.ProductStatus;
+import com.tsm.atelier.domain.product.TargetAudience;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductCompositionRequestDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductPatchDTO;
 import com.tsm.atelier.domain.product.dto.v1.request.ProductRequestDTO;
@@ -26,10 +27,11 @@ public class ProductTestFactory {
 
   public static class ProductRequestBuilder {
     private String name = "Vestido Linho Premium";
-    private String slug = "vestido-linho-premium";
     private String description = "Vestido confeccionado em linho premium.";
     private BigDecimal price = BigDecimal.valueOf(299.90);
+    private BigDecimal promotionalPrice = null;
     private ProductCategory category = ProductCategory.VESTIDOS;
+    private TargetAudience targetAudience = TargetAudience.WOMENSWEAR;
     private Long collectionId = 1L;
     private List<ProductCompositionRequestDTO> compositions =
         List.of(ProductCompositionTestFactory.aProductCompositionRequest());
@@ -57,13 +59,23 @@ public class ProductTestFactory {
 
     public ProductRequestDTO build() {
       return new ProductRequestDTO(
-          name, description, price, category, collectionId, compositions, careInstructions);
+          name,
+          description,
+          price,
+          promotionalPrice,
+          category,
+          targetAudience,
+          collectionId,
+          compositions,
+          careInstructions);
     }
   }
 
   public static ProductPatchDTO aProductPatch() {
     return new ProductPatchDTO(
-        Optional.of("Vestido Linho Atualizado"),
+        Optional.of("Updated Name"),
+        Optional.empty(),
+        Optional.empty(),
         Optional.empty(),
         Optional.empty(),
         Optional.empty(),
@@ -77,7 +89,9 @@ public class ProductTestFactory {
     private String slug = "vestido-linho-premium";
     private String description = "Vestido confeccionado em linho premium.";
     private BigDecimal price = BigDecimal.valueOf(299.90);
+    private BigDecimal promotionalPrice = null;
     private ProductCategory category = ProductCategory.VESTIDOS;
+    private TargetAudience targetAudience = TargetAudience.WOMENSWEAR;
     private ProductStatus status = ProductStatus.ACTIVE;
     private Collection collection = CollectionTestFactory.aCollection().build();
     private List<ProductColor> colors = new ArrayList<>();
@@ -131,7 +145,9 @@ public class ProductTestFactory {
       product.setSlug(slug);
       product.setDescription(description);
       product.setPrice(price);
+      product.setPromotionalPrice(promotionalPrice);
       product.setCategory(category);
+      product.setTargetAudience(targetAudience);
       product.setStatus(status);
       product.setCollection(collection);
       product.setColors(colors);
