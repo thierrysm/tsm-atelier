@@ -38,7 +38,13 @@ public class MediaAssetService {
 
   @Transactional
   public MediaAssetResponseDTO upload(
-      AssetPosition position, MultipartFile file, String altText, String linkUrl) {
+      AssetPosition position,
+      MultipartFile file,
+      String altText,
+      String linkUrl,
+      String title,
+      String subtitle,
+      String buttonText) {
 
     Optional<MediaAsset> existing = mediaAssetRepository.findByPosition(position);
     String oldUrl = existing.map(MediaAsset::getUrl).orElse(null);
@@ -51,6 +57,9 @@ public class MediaAssetService {
     asset.setFileName(result.fileName());
     asset.setAltText(altText);
     asset.setLinkUrl(linkUrl);
+    asset.setTitle(title);
+    asset.setSubtitle(subtitle);
+    asset.setButtonText(buttonText);
 
     MediaAssetResponseDTO response = mediaAssetMapper.toResponse(mediaAssetRepository.save(asset));
 

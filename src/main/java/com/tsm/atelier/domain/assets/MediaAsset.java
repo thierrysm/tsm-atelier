@@ -23,18 +23,25 @@ public class MediaAsset extends BaseEntity {
   private Long id;
 
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false, unique = true, length = 30)
+  @Column(nullable = false, unique = true, length = 50)
   private AssetPosition position;
 
   @Column(nullable = false)
   private String url;
 
-  @Column(nullable = false, length = 60)
+  @Column(nullable = false)
   private String fileName;
 
-  @Column(length = 60)
   private String altText;
 
-  @Column(length = 60)
   private String linkUrl;
+
+  @Column(length = 100)
+  private String title;
+
+  @Column(length = 50)
+  private String subtitle;
+
+  @Column(length = 50)
+  private String buttonText;
 }

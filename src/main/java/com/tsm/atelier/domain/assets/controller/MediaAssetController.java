@@ -39,9 +39,13 @@ public class MediaAssetController {
   public ResponseEntity<MediaAssetResponseDTO> upload(
       @PathVariable AssetPosition position,
       @RequestParam MultipartFile file,
+      @RequestParam String linkUrl,
       @RequestParam(required = false) String altText,
-      @RequestParam(required = false) String linkUrl) {
-    return ResponseEntity.ok(mediaAssetService.upload(position, file, altText, linkUrl));
+      @RequestParam(required = false) String title,
+      @RequestParam(required = false) String subtitle,
+      @RequestParam(required = false) String buttonText) {
+    return ResponseEntity.ok(
+        mediaAssetService.upload(position, file, altText, linkUrl, title, subtitle, buttonText));
   }
 
   @DeleteMapping("/{position}")

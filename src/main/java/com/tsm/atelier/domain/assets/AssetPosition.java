@@ -4,6 +4,7 @@ public enum AssetPosition {
   // Header
   HEADER_LOGO,
   HEADER_BANNER,
+  HEADER_COLLECTION,
 
   // Home
   HOME_BANNER_MAIN,

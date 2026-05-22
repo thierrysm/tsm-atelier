@@ -9,4 +9,6 @@ public record MediaAssetResponseDTO(
     String fileName,
     String altText,
     String linkUrl,
-    Boolean active) {}
+    String title,
+    String subtitle,
+    String buttonText) {}
