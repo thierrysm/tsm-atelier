@@ -13,6 +13,13 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProductValidator {
 
+  public void validateCategoryForAudience(ProductCategory category, TargetAudience audience) {
+    if (!category.isValidFor(audience)) {
+      throw new BusinessException(
+          "A categoria " + category + " não é válida para o público " + audience);
+    }
+  }
+
   public void validateForPublication(ProductIntegrityDTO integrity) {
     List<String> errors = new ArrayList<>();
 

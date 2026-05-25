@@ -46,6 +46,7 @@ public class ProductService {
   public ProductDetailsResponseDTO create(ProductRequestDTO request) {
     validateProductNameAvailability(request.name());
     productValidator.validateCompositions(request.compositions());
+    productValidator.validateCategoryForAudience(request.category(), request.targetAudience());
 
     Product product = productMapper.toEntity(request);
     product.setSlug(generateUniqueSlug(request.name()));
@@ -160,6 +161,9 @@ public class ProductService {
     request.targetAudience().ifPresent(product::setTargetAudience);
     request.material().ifPresent(newCompositions -> updateCompositions(product, newCompositions));
     request.careInstructions().ifPresent(product::setCareInstructions);
+
+    productValidator.validateCategoryForAudience(
+        product.getCategory(), product.getTargetAudience());
 
     return productMapper.toDetailsResponse(productRepository.save(product));
   }
