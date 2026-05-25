@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
 import software.amazon.awssdk.services.s3.model.HeadBucketRequest;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
+import software.amazon.awssdk.services.s3.model.PutBucketPolicyRequest;
 
 @Configuration
 @EnableConfigurationProperties(StorageProperties.class)
@@ -33,6 +34,25 @@ public class StorageConfig {
     } catch (NoSuchBucketException e) {
       client.createBucket(CreateBucketRequest.builder().bucket(properties.bucket()).build());
     }
+
+    String policy =
+        """
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": "*",
+              "Action": "s3:GetObject",
+              "Resource": "arn:aws:s3:::%s/*"
+            }
+          ]
+        }
+        """
+            .formatted(properties.bucket());
+
+    client.putBucketPolicy(
+        PutBucketPolicyRequest.builder().bucket(properties.bucket()).policy(policy).build());
 
     return client;
   }
