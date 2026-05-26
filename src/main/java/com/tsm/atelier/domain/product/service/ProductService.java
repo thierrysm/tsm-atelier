@@ -90,7 +90,9 @@ public class ProductService {
             .and(ProductSpecification.hasCategory(filter.category()))
             .and(ProductSpecification.hasCollection(filter.collectionId()))
             .and(ProductSpecification.hasPriceBetween(filter.minPrice(), filter.maxPrice()))
-            .and(ProductSpecification.hasSizeAndStock(filter.productSize()));
+            .and(ProductSpecification.hasSizeAndStock(filter.productSize()))
+            .and(ProductSpecification.hasTargetAudience(filter.targetAudience()))
+            .and(ProductSpecification.isOnSale(filter.isOnSale()));
 
     Page<Product> productPage = productRepository.findAll(spec, pageable);
     return productPage.map(productMapper::toSummaryResponse);
