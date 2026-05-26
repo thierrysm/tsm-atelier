@@ -14,6 +14,8 @@ import com.tsm.atelier.shared.util.SlugUtils;
 import java.time.Instant;
 import java.util.List;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -28,11 +30,10 @@ public class CollectionService {
   private ProductRepository productRepository;
 
   @Transactional(readOnly = true)
-  public List<CollectionResponseDTO> findAll(
-      CollectionStatus status, Boolean featured, Boolean isNew, Boolean showInHeader) {
-    return collectionRepository.findWithFilters(status, featured, isNew, showInHeader).stream()
-        .map(collectionMapper::toResponse)
-        .toList();
+  public Page<CollectionResponseDTO> findAll(
+      CollectionStatus status, Boolean featured, Boolean isNew, Boolean showInHeader, Pageable pageable) {
+    return collectionRepository.findWithFilters(status, featured, isNew, showInHeader, pageable)
+        .map(collectionMapper::toResponse);
   }
 
   @Transactional(readOnly = true)

@@ -82,14 +82,6 @@ public class ProductService {
   }
 
   @Transactional(readOnly = true)
-  public Slice<ProductSummaryResponseDTO> findAllSummary(Pageable pageable) {
-    Slice<Long> ids = productRepository.findIdsByStatus(ProductStatus.ACTIVE, pageable);
-    List<ProductSummaryResponseDTO> content =
-        hydrateAndMap(ids.getContent(), productMapper::toSummaryResponse);
-    return new SliceImpl<>(content, pageable, ids.hasNext());
-  }
-
-  @Transactional(readOnly = true)
   public Page<ProductSummaryResponseDTO> findAllFiltered(
       ProductFilterDTO filter, Pageable pageable) {
     Specification<Product> spec =

@@ -2,6 +2,8 @@ package com.tsm.atelier.domain.collection;
 
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,13 +18,13 @@ public interface CollectionRepository extends JpaRepository<Collection, Long> {
     AND (:featured IS NULL OR c.featured = :featured)
     AND (:isNew IS NULL OR c.isNew = :isNew)
     AND (:showInHeader IS NULL OR c.showInHeader = :showInHeader)
-    ORDER BY c.displayOrder ASC
 """)
-  List<Collection> findWithFilters(
+  Page<Collection> findWithFilters(
       @Param("status") CollectionStatus status,
       @Param("featured") Boolean featured,
       @Param("isNew") Boolean isNew,
-      @Param("showInHeader") Boolean showInHeader);
+      @Param("showInHeader") Boolean showInHeader,
+      Pageable pageable);
 
   Optional<Collection> findBySlug(String slug);
 

@@ -10,10 +10,12 @@ import com.tsm.atelier.domain.product.service.ProductService;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,12 +42,13 @@ public class CollectionController {
   }
 
   @GetMapping
-  public ResponseEntity<List<CollectionResponseDTO>> findAll(
+  public ResponseEntity<Page<CollectionResponseDTO>> findAll(
       @RequestParam(required = false) CollectionStatus status,
       @RequestParam(required = false) Boolean featured,
       @RequestParam(required = false) Boolean isNew,
-      @RequestParam(required = false) Boolean showInHeader) {
-    return ResponseEntity.ok(collectionService.findAll(status, featured, isNew, showInHeader));
+      @RequestParam(required = false) Boolean showInHeader,
+      @PageableDefault(sort = "displayOrder", direction = Sort.Direction.ASC) Pageable pageable) {
+    return ResponseEntity.ok(collectionService.findAll(status, featured, isNew, showInHeader, pageable));
   }
 
   @GetMapping("/{id}/products")
