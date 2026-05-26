@@ -1,6 +1,7 @@
 package com.tsm.atelier.domain.collection;
 
 import com.tsm.atelier.domain.product.Product;
+import com.tsm.atelier.domain.product.TargetAudience;
 import com.tsm.atelier.shared.BaseEntity;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -47,6 +48,10 @@ public class Collection extends BaseEntity {
   @Enumerated(EnumType.STRING)
   @Column(nullable = false, length = 15)
   private CollectionStatus status = CollectionStatus.DRAFT;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "target_audience", nullable = false, length = 20)
+  private TargetAudience targetAudience = TargetAudience.UNISEX;
 
   @Column(nullable = false)
   private Boolean featured = false;

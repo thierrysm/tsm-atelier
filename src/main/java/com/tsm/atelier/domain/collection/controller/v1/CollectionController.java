@@ -5,11 +5,12 @@ import com.tsm.atelier.domain.collection.CollectionStatus;
 import com.tsm.atelier.domain.collection.dto.v1.request.CollectionPatchDTO;
 import com.tsm.atelier.domain.collection.dto.v1.request.CollectionRequestDTO;
 import com.tsm.atelier.domain.collection.dto.v1.response.CollectionResponseDTO;
+import com.tsm.atelier.domain.product.TargetAudience;
 import com.tsm.atelier.domain.product.dto.v1.response.ProductSummaryResponseDTO;
 import com.tsm.atelier.domain.product.service.ProductService;
 import jakarta.validation.Valid;
 import java.net.URI;
-import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,14 +33,10 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @RestController
 @RequestMapping("/api/v1/collections")
+@RequiredArgsConstructor
 public class CollectionController {
   private final CollectionService collectionService;
   private final ProductService productService;
-
-  public CollectionController(CollectionService collectionService, ProductService productService) {
-    this.collectionService = collectionService;
-    this.productService = productService;
-  }
 
   @GetMapping
   public ResponseEntity<Page<CollectionResponseDTO>> findAll(
@@ -47,8 +44,10 @@ public class CollectionController {
       @RequestParam(required = false) Boolean featured,
       @RequestParam(required = false) Boolean isNew,
       @RequestParam(required = false) Boolean showInHeader,
+      @RequestParam(required = false) TargetAudience targetAudience,
       @PageableDefault(sort = "displayOrder", direction = Sort.Direction.ASC) Pageable pageable) {
-    return ResponseEntity.ok(collectionService.findAll(status, featured, isNew, showInHeader, pageable));
+    return ResponseEntity.ok(
+        collectionService.findAll(status, featured, isNew, showInHeader, targetAudience, pageable));
   }
 
   @GetMapping("/{id}/products")

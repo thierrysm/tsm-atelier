@@ -5,6 +5,8 @@ spring:
     verification-base-url: ${VERIFICATION_BASE_URL:http://localhost:3000/auth/verify}
   datasource:
     password: ${DB_PASSWORD:1234}
+  flyway:
+    clean-on-validation-error: false
   security:
     jwt:
       # Gerado apenas para dev

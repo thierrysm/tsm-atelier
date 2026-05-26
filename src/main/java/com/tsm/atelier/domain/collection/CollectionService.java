@@ -3,6 +3,7 @@ package com.tsm.atelier.domain.collection;
 import com.tsm.atelier.domain.collection.dto.v1.request.CollectionPatchDTO;
 import com.tsm.atelier.domain.collection.dto.v1.request.CollectionRequestDTO;
 import com.tsm.atelier.domain.collection.dto.v1.response.CollectionResponseDTO;
+import com.tsm.atelier.domain.product.TargetAudience;
 import com.tsm.atelier.domain.product.repository.ProductRepository;
 import com.tsm.atelier.exception.BusinessException;
 import com.tsm.atelier.exception.EntityAlreadyExistsException;
@@ -12,7 +13,6 @@ import com.tsm.atelier.shared.image.ImageFolder;
 import com.tsm.atelier.shared.image.ImageService;
 import com.tsm.atelier.shared.util.SlugUtils;
 import java.time.Instant;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -31,8 +31,14 @@ public class CollectionService {
 
   @Transactional(readOnly = true)
   public Page<CollectionResponseDTO> findAll(
-      CollectionStatus status, Boolean featured, Boolean isNew, Boolean showInHeader, Pageable pageable) {
-    return collectionRepository.findWithFilters(status, featured, isNew, showInHeader, pageable)
+      CollectionStatus status,
+      Boolean featured,
+      Boolean isNew,
+      Boolean showInHeader,
+      TargetAudience targetAudience,
+      Pageable pageable) {
+    return collectionRepository
+        .findWithFilters(status, featured, isNew, showInHeader, targetAudience, pageable)
         .map(collectionMapper::toResponse);
   }
 
@@ -66,7 +72,7 @@ public class CollectionService {
     collection.setSlug(generateUniqueSlug(request.name()));
 
     if (Boolean.TRUE.equals(collection.getShowInHeader())) {
-      collectionRepository.unsetAllShowInHeader();
+      collectionRepository.unsetAllShowInHeaderForTargetAudience(collection.getTargetAudience());
     }
 
     return collectionMapper.toResponse(collectionRepository.save(collection));
@@ -93,17 +99,16 @@ public class CollectionService {
             });
     request.description().ifPresent(collection::setDescription);
     request.featured().ifPresent(collection::setFeatured);
-    request
-        .showInHeader()
-        .ifPresent(
-            showInHeader -> {
-              collection.setShowInHeader(showInHeader);
-              if (showInHeader) {
-                collectionRepository.unsetShowInHeaderForOthers(id);
-              }
-            });
+    request.showInHeader().ifPresent(collection::setShowInHeader);
     request.isNew().ifPresent(collection::setIsNew);
     request.displayOrder().ifPresent(collection::setDisplayOrder);
+    request.targetAudience().ifPresent(collection::setTargetAudience);
+
+    if (collection.getShowInHeader()
+        && (request.showInHeader().isPresent() || request.targetAudience().isPresent())) {
+      collectionRepository.unsetShowInHeaderForOthersInTargetAudience(
+          collection.getId(), collection.getTargetAudience());
+    }
 
     return collectionMapper.toResponse(collectionRepository.save(collection));
   }

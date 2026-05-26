@@ -1,0 +1,2 @@
+ALTER TABLE collections
+    ADD COLUMN target_audience VARCHAR(20) NOT NULL DEFAULT 'UNISEX';
