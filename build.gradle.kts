@@ -43,7 +43,7 @@ dependencies {
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
 	implementation("com.resend:resend-java:+")
 	implementation("com.stripe:stripe-java:32.0.0")
-	implementation("org.springframework.retry:spring-retry:2.0.11")
+	implementation("org.springframework.retry:spring-retry:2.0.12")
 	implementation("net.logstash.logback:logstash-logback-encoder:8.0")
 	implementation("org.springframework:spring-aspects")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.12.6")
