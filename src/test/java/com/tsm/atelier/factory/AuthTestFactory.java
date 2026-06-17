@@ -1,6 +1,5 @@
 package com.tsm.atelier.factory;
 
-import com.tsm.atelier.domain.auth.EmailVerificationToken;
 import com.tsm.atelier.domain.auth.Role;
 import com.tsm.atelier.domain.auth.User;
 import com.tsm.atelier.domain.auth.UserStatus;
@@ -27,9 +26,6 @@ public class AuthTestFactory {
     return new RefreshTokenBuilder();
   }
 
-  public static VerificationTokenBuilder aVerificationToken() {
-    return new VerificationTokenBuilder();
-  }
 
   public static class LoginRequestBuilder {
     private String email = "ronaldinho@email.com";
@@ -165,34 +161,5 @@ public class AuthTestFactory {
     }
   }
 
-  public static class VerificationTokenBuilder {
-    private String token = "valid_token";
-    private User user = new UserBuilder().build();
-    private Instant expiresAt = Instant.now().plusSeconds(14400);
-    private Boolean used = false;
 
-    public VerificationTokenBuilder withUser(User user) {
-      this.user = user;
-      return this;
-    }
-
-    public VerificationTokenBuilder used() {
-      this.used = true;
-      return this;
-    }
-
-    public VerificationTokenBuilder expired() {
-      this.expiresAt = Instant.now().minusSeconds(1);
-      return this;
-    }
-
-    public EmailVerificationToken build() {
-      EmailVerificationToken verificationToken = new EmailVerificationToken();
-      verificationToken.setToken(token);
-      verificationToken.setUser(user);
-      verificationToken.setExpiresAt(expiresAt);
-      verificationToken.setUsed(used);
-      return verificationToken;
-    }
-  }
 }

@@ -21,7 +21,7 @@ services:
       - "9001:9001"   # Console web
     command: server /data --console-address ":9001"
     volumes:
-      - minio_data:/data
+      - ./minio_storage:/data
 
   redis:
     image: redis:7-alpine

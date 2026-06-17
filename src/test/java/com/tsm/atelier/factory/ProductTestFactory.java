@@ -30,7 +30,7 @@ public class ProductTestFactory {
     private String description = "Vestido confeccionado em linho premium.";
     private BigDecimal price = BigDecimal.valueOf(299.90);
     private BigDecimal promotionalPrice = null;
-    private ProductCategory category = ProductCategory.VESTIDOS;
+    private ProductCategory category = ProductCategory.DRESS;
     private TargetAudience targetAudience = TargetAudience.WOMENSWEAR;
     private Long collectionId = 1L;
     private List<ProductCompositionRequestDTO> compositions =
@@ -90,7 +90,7 @@ public class ProductTestFactory {
     private String description = "Vestido confeccionado em linho premium.";
     private BigDecimal price = BigDecimal.valueOf(299.90);
     private BigDecimal promotionalPrice = null;
-    private ProductCategory category = ProductCategory.VESTIDOS;
+    private ProductCategory category = ProductCategory.DRESS;
     private TargetAudience targetAudience = TargetAudience.WOMENSWEAR;
     private ProductStatus status = ProductStatus.ACTIVE;
     private Collection collection = CollectionTestFactory.aCollection().build();

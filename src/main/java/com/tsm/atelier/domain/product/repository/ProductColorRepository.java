@@ -7,10 +7,10 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProductColorRepository extends JpaRepository<ProductColor, Long> {
-  @EntityGraph(attributePaths = {"images", "variants"})
-  List<ProductColor> findAllByProductId(Long productId);
 
   Optional<ProductColor> findByIdAndProductId(Long id, Long productId);
+
+  boolean existsByIdAndProductId(Long id, Long productId);
 
   boolean existsByProductIdAndNameIgnoreCase(Long productId, String name);
 

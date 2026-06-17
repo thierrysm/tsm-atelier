@@ -10,6 +10,7 @@ import com.tsm.atelier.domain.product.dto.v1.response.ProductVariantResponseDTO;
 import com.tsm.atelier.domain.product.mapper.ProductMapper;
 import com.tsm.atelier.domain.product.repository.ProductColorRepository;
 import com.tsm.atelier.domain.product.repository.ProductVariantRepository;
+import com.tsm.atelier.exception.BusinessException;
 import com.tsm.atelier.exception.EntityAlreadyExistsException;
 import com.tsm.atelier.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -27,15 +28,16 @@ public class ProductVariantService {
   @Transactional
   public ProductVariantResponseDTO addVariant(
       Long productId, Long colorId, ProductVariantRequestDTO request) {
-    if (productVariantRepository.existsByProductColorIdAndSize(colorId, request.size())) {
-      throw new EntityAlreadyExistsException(
-          "Variante do produto", "tamanho", request.size().toString());
-    }
 
     ProductColor productColor =
         productColorRepository
             .findByIdAndProductId(colorId, productId)
             .orElseThrow(() -> new EntityNotFoundException("Cor do produto", "id", colorId));
+
+    if (productVariantRepository.existsByProductColorIdAndSize(colorId, request.size())) {
+      throw new EntityAlreadyExistsException(
+          "Variante do produto", "tamanho", request.size().toString());
+    }
 
     ProductVariant variant = productMapper.toEntity(request);
     variant.setProductColor(productColor);

@@ -10,12 +10,10 @@ public class SecurityRoutes {
     "/api/v1/auth/logout",
     "/api/v1/auth/forgot-password",
     "/api/v1/auth/reset-password",
-    "/api/v1/auth/resend-verification",
     "/api/v1/webhooks/stripe"
   };
 
   public static final String[] PUBLIC_GET = {
-    "/api/v1/auth/verify",
     "/api/v1/products/**",
     "/api/v1/collections/**",
     "/api/v1/media-assets/**",

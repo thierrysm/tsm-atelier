@@ -11,9 +11,7 @@ spring:
     jwt:
       # Gerado apenas para dev
       secret: ${JWT_SECRET:ZGV2LW9ubHktc2VjcmV0LWtleS1jaGFuZ2UtbWUtaW4tcHJvZHVjdGlvbi0xMjM0NQ==}
-  resend:
-    api-key: ${RESEND_API_KEY:re_dev_placeholder}
-    from: ${RESEND_FROM:Atelier <onboarding@resend.dev>}
+
   storage:
     minio:
       access-key: ${MINIO_ACCESS_KEY:atelier}

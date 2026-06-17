@@ -228,42 +228,6 @@ class AuthControllerTest {
     }
   }
 
-  @Nested
-  @DisplayName("Verificação de Email")
-  class VerifyEmail {
-
-    @Test
-    @DisplayName("Deve verificar email com sucesso")
-    void shouldVerifyEmailSuccessfully() throws Exception {
-      // Arrange
-      String token = "valid_token";
-      doNothing().when(authService).verifyEmail(token);
-
-      // Act & Assert
-      mockMvc
-          .perform(get("/api/v1/auth/verify").param("token", token))
-          .andExpect(status().isNoContent());
-
-      verify(authService).verifyEmail(token);
-    }
-
-    @Test
-    @DisplayName("Deve retornar 400 Bad Request para token inválido")
-    void shouldReturnBadRequestWhenTokenIsInvalid() throws Exception {
-      // Arrange
-      String token = "invalid_token";
-      doThrow(new BusinessException("Token de verificação inválido"))
-          .when(authService)
-          .verifyEmail(token);
-
-      // Act & Assert
-      mockMvc
-          .perform(get("/api/v1/auth/verify").param("token", token))
-          .andExpect(status().isBadRequest())
-          .andExpect(jsonPath("$.status").value(400))
-          .andExpect(jsonPath("$.message").value("Token de verificação inválido"));
-    }
-  }
 
   @Nested
   @DisplayName("Logout")

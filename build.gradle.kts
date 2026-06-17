@@ -41,7 +41,6 @@ dependencies {
 	implementation("software.amazon.awssdk:s3:2.44.12")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("io.jsonwebtoken:jjwt-api:0.12.6")
-	implementation("com.resend:resend-java:+")
 	implementation("com.stripe:stripe-java:32.0.0")
 	implementation("org.springframework.retry:spring-retry:2.0.12")
 	implementation("net.logstash.logback:logstash-logback-encoder:9.0")

@@ -1,0 +1,1747 @@
+{
+  "info": {
+    "name": "TSM Atelier E-Commerce",
+    "description": "Coleção de requisições do Postman para testar os endpoints da API do TSM Atelier (E-commerce de Roupas de Luxo).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "token",
+      "value": "",
+      "type": "string"
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "1. Autenticação",
+      "description": "Endpoints públicos para registro, login, refresh e logout de usuários.",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Registrar Novo Usuário",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@example.com\",\n  \"password\": \"senhaSegura123\",\n  \"firstName\": \"Thierry\",\n  \"lastName\": \"Silva\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/register",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Registra um novo cliente na plataforma. Após o registro, a conta é ativada imediatamente (sem verificação de e-mail necessária)."
+          }
+        },
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"cliente@example.com\",\n  \"password\": \"senhaSegura123\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Realiza o login do usuário. Retorna o access token e define o refresh token nos Cookies. Salva automaticamente o access token na variável global 'token'."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.accessToken) {",
+                  "    pm.collectionVariables.set(\"token\", response.accessToken);",
+                  "    console.log(\"Access Token atualizado na variável da coleção: \" + response.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar Token (Refresh)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/refresh",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "refresh"
+              ]
+            },
+            "description": "Gera um novo access token a partir do cookie 'refresh_token'. Também atualiza a variável global 'token' e o cookie 'refresh_token'."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const response = pm.response.json();",
+                  "if (response.accessToken) {",
+                  "    pm.collectionVariables.set(\"token\", response.accessToken);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/logout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "logout"
+              ]
+            },
+            "description": "Revoga o refresh token e limpa os cookies de autenticação."
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Produtos",
+      "description": "Endpoints públicos de listagem/busca de produtos e endpoints administrativos de criação/edição.",
+      "item": [
+        {
+          "name": "Listar Produtos (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products?query=Sobretudo&category=CASACOS&targetAudience=UNISEX&collectionId=&productSize=M&minPrice=100.00&maxPrice=3000.00&isOnSale=false&page=0&size=20&sort=name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Sobretudo",
+                  "disabled": false
+                },
+                {
+                  "key": "category",
+                  "value": "CASACOS",
+                  "disabled": false
+                },
+                {
+                  "key": "targetAudience",
+                  "value": "UNISEX",
+                  "disabled": false
+                },
+                {
+                  "key": "collectionId",
+                  "value": "",
+                  "disabled": false
+                },
+                {
+                  "key": "productSize",
+                  "value": "M",
+                  "disabled": false
+                },
+                {
+                  "key": "minPrice",
+                  "value": "100.00",
+                  "disabled": false
+                },
+                {
+                  "key": "maxPrice",
+                  "value": "3000.00",
+                  "disabled": false
+                },
+                {
+                  "key": "isOnSale",
+                  "value": "false",
+                  "disabled": false
+                },
+                {
+                  "key": "page",
+                  "value": "0",
+                  "disabled": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "disabled": false
+                },
+                {
+                  "key": "sort",
+                  "value": "name",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Busca produtos com filtros opcionais, paginação e ordenação."
+          }
+        },
+        {
+          "name": "Detalhar Produto por ID (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Obtém detalhes de um produto específico usando o seu ID numérico."
+          }
+        },
+        {
+          "name": "Detalhar Produto por Slug (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/slug/:slug",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                "slug",
+                ":slug"
+              ],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "sobretudo-de-la-premium",
+                  "description": "ID or slug for slug"
+                }
+              ]
+            },
+            "description": "Obtém detalhes de um produto específico usando o seu slug (URL amigável)."
+          }
+        },
+        {
+          "name": "Criar Produto (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sobretudo de L\\u00e3 Premium\",\n  \"description\": \"Sobretudo confeccionado com l\\u00e3 italiana virgem de alt\\u00edssima qualidade, forro 100% seda.\",\n  \"price\": 1499.9,\n  \"promotionalPrice\": 1299.9,\n  \"category\": \"CASACOS\",\n  \"targetAudience\": \"UNISEX\",\n  \"collectionId\": 1,\n  \"compositions\": [\n    {\n      \"type\": \"EXTERNAL\",\n      \"materials\": [\n        {\n          \"name\": \"L\\u00e3 Virgem\",\n          \"percentage\": 90\n        },\n        {\n          \"name\": \"Poliamida\",\n          \"percentage\": 10\n        }\n      ]\n    },\n    {\n      \"type\": \"INTERNAL\",\n      \"materials\": [\n        {\n          \"name\": \"Seda\",\n          \"percentage\": 100\n        }\n      ]\n    }\n  ],\n  \"careInstructions\": [\n    \"N\\u00e3o lavar com \\u00e1gua\",\n    \"N\\u00e3o alvejar\",\n    \"Secagem em tambor n\\u00e3o permitida\",\n    \"Passar a ferro at\\u00e9 110\\u00b0C\",\n    \"Limpeza a seco profissional\"\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products"
+              ]
+            },
+            "description": "Cria um novo produto. Requer perfil ADMIN. As categorias permitidas dependem do público-alvo (targetAudience)."
+          }
+        },
+        {
+          "name": "Atualização Parcial de Produto (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"price\": 1599.9,\n  \"promotionalPrice\": 1399.9\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Atualiza parcialmente os campos de um produto existente. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Publicar Produto (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:id/publish",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":id",
+                "publish"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Torna o produto visível na listagem pública. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Arquivar Produto (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:id/archive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":id",
+                "archive"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Oculta o produto da listagem pública. Requer perfil ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Cores de Produtos (Admin)",
+      "description": "Operações administrativas de cores vinculadas a um produto.",
+      "item": [
+        {
+          "name": "Adicionar Cor ao Produto",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Preto Cl\\u00e1ssico\",\n  \"hexCode\": \"#000000\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                }
+              ]
+            },
+            "description": "Vincula uma nova cor ao produto. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Atualizar Cor",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Preto Absoluto\",\n  \"hexCode\": \"#050505\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors/:colorId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors",
+                ":colorId"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                },
+                {
+                  "key": "colorId",
+                  "value": "1",
+                  "description": "ID or slug for colorId"
+                }
+              ]
+            },
+            "description": "Atualiza parcialmente o nome ou código hexadecimal de uma cor do produto. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Remover Cor do Produto",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors/:colorId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors",
+                ":colorId"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                },
+                {
+                  "key": "colorId",
+                  "value": "1",
+                  "description": "ID or slug for colorId"
+                }
+              ]
+            },
+            "description": "Remove uma cor vinculada ao produto. Requer perfil ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Imagens de Produtos (Admin)",
+      "description": "Upload e gerenciamento de mídias/imagens para cores de produtos.",
+      "item": [
+        {
+          "name": "Upload de Imagens",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Arquivo de imagem a ser enviado"
+                },
+                {
+                  "key": "isCover",
+                  "value": "false",
+                  "type": "text",
+                  "description": "Define se é a imagem de capa (principal)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors/:colorId/images",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors",
+                ":colorId",
+                "images"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                },
+                {
+                  "key": "colorId",
+                  "value": "1",
+                  "description": "ID or slug for colorId"
+                }
+              ]
+            },
+            "description": "Envia uma ou mais imagens para uma cor específica do produto. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Definir Imagem como Capa",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors/:colorId/images/:imageId/cover",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors",
+                ":colorId",
+                "images",
+                ":imageId",
+                "cover"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                },
+                {
+                  "key": "colorId",
+                  "value": "1",
+                  "description": "ID or slug for colorId"
+                },
+                {
+                  "key": "imageId",
+                  "value": "1",
+                  "description": "ID or slug for imageId"
+                }
+              ]
+            },
+            "description": "Define uma imagem específica como capa principal daquela cor de produto. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Deletar Imagem",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors/:colorId/images/:imageId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors",
+                ":colorId",
+                "images",
+                ":imageId"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                },
+                {
+                  "key": "colorId",
+                  "value": "1",
+                  "description": "ID or slug for colorId"
+                },
+                {
+                  "key": "imageId",
+                  "value": "1",
+                  "description": "ID or slug for imageId"
+                }
+              ]
+            },
+            "description": "Exclui a imagem do produto. Requer perfil ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Variantes de Produtos (Grade/Stock) (Admin)",
+      "description": "Gerenciamento da grade de tamanhos e estoque de cada cor de produto.",
+      "item": [
+        {
+          "name": "Adicionar Variante (Tamanho/Estoque)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"size\": \"M\",\n  \"stock\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors/:colorId/variants",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors",
+                ":colorId",
+                "variants"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                },
+                {
+                  "key": "colorId",
+                  "value": "1",
+                  "description": "ID or slug for colorId"
+                }
+              ]
+            },
+            "description": "Adiciona uma nova variante de tamanho e quantidade em estoque para a cor do produto. Tamanhos válidos: PP, P, M, G, GG. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Atualizar Estoque da Variante",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stock\": 25\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors/:colorId/variants/:variantId/stock",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors",
+                ":colorId",
+                "variants",
+                ":variantId",
+                "stock"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                },
+                {
+                  "key": "colorId",
+                  "value": "1",
+                  "description": "ID or slug for colorId"
+                },
+                {
+                  "key": "variantId",
+                  "value": "1",
+                  "description": "ID or slug for variantId"
+                }
+              ]
+            },
+            "description": "Atualiza a quantidade em estoque de uma variante de tamanho de um produto. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Deletar Variante",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/products/:productId/colors/:colorId/variants/:variantId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "products",
+                ":productId",
+                "colors",
+                ":colorId",
+                "variants",
+                ":variantId"
+              ],
+              "variable": [
+                {
+                  "key": "productId",
+                  "value": "1",
+                  "description": "ID or slug for productId"
+                },
+                {
+                  "key": "colorId",
+                  "value": "1",
+                  "description": "ID or slug for colorId"
+                },
+                {
+                  "key": "variantId",
+                  "value": "1",
+                  "description": "ID or slug for variantId"
+                }
+              ]
+            },
+            "description": "Exclui a variante de tamanho/estoque. Requer perfil ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Coleções",
+      "description": "Endpoints públicos de listagem de coleções e endpoints administrativos para criação e gerenciamento.",
+      "item": [
+        {
+          "name": "Listar Coleções (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections?status=ACTIVE&featured=true&isNew=true&showInHeader=true&targetAudience=UNISEX",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "ACTIVE",
+                  "disabled": false
+                },
+                {
+                  "key": "featured",
+                  "value": "true",
+                  "disabled": false
+                },
+                {
+                  "key": "isNew",
+                  "value": "true",
+                  "disabled": false
+                },
+                {
+                  "key": "showInHeader",
+                  "value": "true",
+                  "disabled": false
+                },
+                {
+                  "key": "targetAudience",
+                  "value": "UNISEX",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Busca coleções ativas com filtros, paginação e ordenação por ordem de exibição."
+          }
+        },
+        {
+          "name": "Listar Produtos de uma Coleção (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:id/products?page=0&size=10&sort=name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":id",
+                "products"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "disabled": false
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "disabled": false
+                },
+                {
+                  "key": "sort",
+                  "value": "name",
+                  "disabled": false
+                }
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Lista os produtos associados a uma coleção específica."
+          }
+        },
+        {
+          "name": "Detalhar Coleção por ID (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Obtém detalhes de uma coleção usando seu ID."
+          }
+        },
+        {
+          "name": "Detalhar Coleção por Slug (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:slug/slug",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":slug",
+                "slug"
+              ],
+              "variable": [
+                {
+                  "key": "slug",
+                  "value": "outono-inverno-2026",
+                  "description": "ID or slug for slug"
+                }
+              ]
+            },
+            "description": "Obtém detalhes de uma coleção usando seu slug."
+          }
+        },
+        {
+          "name": "Criar Coleção (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Outono Inverno 2026\",\n  \"description\": \"Uma cole\\u00e7\\u00e3o inspirada na eleg\\u00e2ncia do frio minimalista.\",\n  \"targetAudience\": \"UNISEX\",\n  \"featured\": true,\n  \"showInHeader\": true,\n  \"isNew\": true,\n  \"displayOrder\": 1\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections"
+              ]
+            },
+            "description": "Cria uma nova coleção de produtos. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Atualização Parcial de Coleção (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Cole\\u00e7\\u00e3o Outono Inverno 2026\",\n  \"displayOrder\": 2\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Atualiza parcialmente os campos de uma coleção. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Upload de Imagem da Coleção (Admin)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Imagem da coleção"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:collectionId/image",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":collectionId",
+                "image"
+              ],
+              "variable": [
+                {
+                  "key": "collectionId",
+                  "value": "1",
+                  "description": "ID or slug for collectionId"
+                }
+              ]
+            },
+            "description": "Faz upload ou atualiza a imagem de uma coleção. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Ativar Coleção (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:id/activate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":id",
+                "activate"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Muda o status da coleção para ACTIVE. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Arquivar Coleção (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:id/archive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":id",
+                "archive"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Muda o status da coleção para ARCHIVED. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Desarquivar Coleção (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:id/unarchive",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":id",
+                "unarchive"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Muda o status da coleção arquivada de volta para DRAFT. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Deletar Coleção (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/collections/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "collections",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "1",
+                  "description": "ID or slug for id"
+                }
+              ]
+            },
+            "description": "Deleta fisicamente uma coleção (se não possuir produtos vinculados). Requer perfil ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Perfil e Endereços do Cliente",
+      "description": "Operações de consulta e alteração do perfil do cliente autenticado e de seus endereços de entrega.",
+      "item": [
+        {
+          "name": "Consultar Meu Perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/client/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "client",
+                "profile"
+              ]
+            },
+            "description": "Obtém as informações de cadastro e endereços do cliente autenticado."
+          }
+        },
+        {
+          "name": "Atualizar Meu Perfil",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"Thierry\",\n  \"lastName\": \"Silva\",\n  \"cpf\": \"123.456.789-00\",\n  \"phone\": \"(11) 98765-4321\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/client/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "client",
+                "profile"
+              ]
+            },
+            "description": "Atualiza o nome, sobrenome, CPF e telefone do cliente autenticado."
+          }
+        },
+        {
+          "name": "Adicionar Endereço",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"cep\": \"01311-200\",\n  \"street\": \"Avenida Paulista\",\n  \"number\": \"1000\",\n  \"complement\": \"Apto 152\",\n  \"neighborhood\": \"Bela Vista\",\n  \"city\": \"S\\u00e3o Paulo\",\n  \"state\": \"SP\",\n  \"isDefault\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/client/profile/addresses",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "client",
+                "profile",
+                "addresses"
+              ]
+            },
+            "description": "Cadastra um novo endereço de entrega. Formato do CEP esperado: 00000-000."
+          }
+        },
+        {
+          "name": "Remover Endereço",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/client/profile/addresses/:addressId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "client",
+                "profile",
+                "addresses",
+                ":addressId"
+              ],
+              "variable": [
+                {
+                  "key": "addressId",
+                  "value": "1",
+                  "description": "ID or slug for addressId"
+                }
+              ]
+            },
+            "description": "Exclui um endereço cadastrado do cliente."
+          }
+        },
+        {
+          "name": "Definir Endereço como Padrão",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/client/profile/addresses/:addressId/default",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "client",
+                "profile",
+                "addresses",
+                ":addressId",
+                "default"
+              ],
+              "variable": [
+                {
+                  "key": "addressId",
+                  "value": "1",
+                  "description": "ID or slug for addressId"
+                }
+              ]
+            },
+            "description": "Define o endereço selecionado como o padrão para checkout."
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Pedidos e Vendas (Orders)",
+      "description": "Endpoints de checkout e histórico de compras (Cliente) e gerenciamento de vendas (Admin).",
+      "item": [
+        {
+          "name": "Finalizar Pedido (Checkout)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"items\": [\n    {\n      \"productVariantId\": 1,\n      \"quantity\": 1\n    }\n  ],\n  \"shippingAddress\": {\n    \"recipientName\": \"Thierry Silva\",\n    \"cep\": \"01311-200\",\n    \"street\": \"Avenida Paulista\",\n    \"number\": \"1000\",\n    \"complement\": \"Apto 152\",\n    \"neighborhood\": \"Bela Vista\",\n    \"city\": \"S\\u00e3o Paulo\",\n    \"state\": \"SP\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/checkout",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "checkout"
+              ]
+            },
+            "description": "Realiza o checkout de compras. Retorna a URL da sessão de pagamento do Stripe no campo 'paymentUrl'."
+          }
+        },
+        {
+          "name": "Listar Meus Pedidos (Cliente)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/me?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "me"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "disabled": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Lista o histórico de pedidos efetuados pelo próprio cliente logado."
+          }
+        },
+        {
+          "name": "Detalhar Meu Pedido (Cliente)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/orders/me/:orderId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "orders",
+                "me",
+                ":orderId"
+              ],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "dfc0b62e-503d-4c38-89c7-f5820468ea9f",
+                  "description": "ID or slug for orderId"
+                }
+              ]
+            },
+            "description": "Exibe os detalhes de um pedido específico do cliente usando o UUID do pedido."
+          }
+        },
+        {
+          "name": "Listar Todos os Pedidos (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/orders?page=0&size=20",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "orders"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "disabled": false
+                },
+                {
+                  "key": "size",
+                  "value": "20",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Lista todos os pedidos realizados no sistema. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Detalhar Pedido (Admin)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/orders/:orderId",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "orders",
+                ":orderId"
+              ],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "dfc0b62e-503d-4c38-89c7-f5820468ea9f",
+                  "description": "ID or slug for orderId"
+                }
+              ]
+            },
+            "description": "Exibe detalhes administrativos do pedido. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Atualizar Status do Pedido (Admin)",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"PAID\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/admin/orders/:orderId/status",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "admin",
+                "orders",
+                ":orderId",
+                "status"
+              ],
+              "variable": [
+                {
+                  "key": "orderId",
+                  "value": "dfc0b62e-503d-4c38-89c7-f5820468ea9f",
+                  "description": "ID or slug for orderId"
+                }
+              ]
+            },
+            "description": "Atualiza o status de entrega/pagamento do pedido. Status válidos: PENDING_PAYMENT, PAID, SHIPPED, DELIVERED, REFUNDED, CANCELLED. Requer perfil ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Banners e Logotipos (Media Assets)",
+      "description": "Gerenciamento de imagens institucionais do site, como banners da Home, logotipos do Header/Footer.",
+      "item": [
+        {
+          "name": "Obter Imagem de uma Posição (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/media-assets/:position",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-assets",
+                ":position"
+              ],
+              "variable": [
+                {
+                  "key": "position",
+                  "value": "HOME_BANNER_MAIN",
+                  "description": "ID or slug for position"
+                }
+              ]
+            },
+            "description": "Retorna a imagem e metadados cadastrados para uma determinada posição."
+          }
+        },
+        {
+          "name": "Obter Múltiplas Posições (Público)",
+          "request": {
+            "auth": {
+              "type": "noauth"
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/media-assets?positions=HEADER_LOGO,FOOTER_LOGO,HOME_BANNER_MAIN",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-assets"
+              ],
+              "query": [
+                {
+                  "key": "positions",
+                  "value": "HEADER_LOGO,FOOTER_LOGO,HOME_BANNER_MAIN",
+                  "disabled": false
+                }
+              ]
+            },
+            "description": "Retorna uma lista de imagens para as posições fornecidas via parâmetro."
+          }
+        },
+        {
+          "name": "Cadastrar/Atualizar Imagem da Posição (Admin)",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "description": "Arquivo de imagem a ser enviado"
+                },
+                {
+                  "key": "linkUrl",
+                  "value": "https://tsm-atelier.com/colecao-outono",
+                  "type": "text",
+                  "description": "URL de redirecionamento ao clicar no banner"
+                },
+                {
+                  "key": "altText",
+                  "value": "Coleção Outono Inverno",
+                  "type": "text",
+                  "description": "Texto descritivo de acessibilidade"
+                },
+                {
+                  "key": "title",
+                  "value": "Sofisticação Atemporal",
+                  "type": "text",
+                  "description": "Título sobreposto (opcional)"
+                },
+                {
+                  "key": "subtitle",
+                  "value": "Descubra o minimalismo de luxo",
+                  "type": "text",
+                  "description": "Subtítulo sobreposto (opcional)"
+                },
+                {
+                  "key": "buttonText",
+                  "value": "Comprar Agora",
+                  "type": "text",
+                  "description": "Texto do botão do banner (opcional)"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/media-assets/:position",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-assets",
+                ":position"
+              ],
+              "variable": [
+                {
+                  "key": "position",
+                  "value": "HOME_BANNER_MAIN",
+                  "description": "ID or slug for position"
+                }
+              ]
+            },
+            "description": "Faz upload e associa uma nova mídia a uma posição do site. Requer perfil ADMIN."
+          }
+        },
+        {
+          "name": "Remover Imagem de uma Posição (Admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/media-assets/:position",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "media-assets",
+                ":position"
+              ],
+              "variable": [
+                {
+                  "key": "position",
+                  "value": "HOME_BANNER_MAIN",
+                  "description": "ID or slug for position"
+                }
+              ]
+            },
+            "description": "Remove a mídia associada à posição especificada. Requer perfil ADMIN."
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Webhooks (Stripe)",
+      "description": "Webhooks de recebimento de notificações externas.",
+      "auth": {
+        "type": "noauth"
+      },
+      "item": [
+        {
+          "name": "Receber Evento do Stripe",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Stripe-Signature",
+                "value": "t=123456789,v1=abcdef",
+                "description": "Assinatura Stripe para validação"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"evt_123\",\n  \"object\": \"event\",\n  \"type\": \"checkout.session.completed\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/webhooks/stripe",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "webhooks",
+                "stripe"
+              ]
+            },
+            "description": "Endpoint acionado pelo Stripe para atualizar o status do pagamento do pedido para PAID ou expirado. Requer assinatura de cabeçalho válida em ambiente de produção/stage."
+          }
+        }
+      ]
+    }
+  ]
+}

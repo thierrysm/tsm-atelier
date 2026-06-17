@@ -11,7 +11,6 @@ import static org.mockito.Mockito.when;
 
 import com.tsm.atelier.config.ApplicationProperties;
 import com.tsm.atelier.config.SecurityProperties;
-import com.tsm.atelier.domain.auth.EmailVerificationToken;
 import com.tsm.atelier.domain.auth.RefreshToken;
 import com.tsm.atelier.domain.auth.Role;
 import com.tsm.atelier.domain.auth.User;
@@ -20,12 +19,10 @@ import com.tsm.atelier.domain.auth.dto.v1.request.LoginRequestDTO;
 import com.tsm.atelier.domain.auth.dto.v1.request.RefreshTokenRequestDTO;
 import com.tsm.atelier.domain.auth.dto.v1.request.RegisterRequestDTO;
 import com.tsm.atelier.domain.auth.dto.v1.response.AuthResponseDTO;
-import com.tsm.atelier.domain.auth.repository.EmailVerificationTokenRepository;
 import com.tsm.atelier.domain.auth.repository.RefreshTokenRepository;
 import com.tsm.atelier.domain.auth.repository.UserRepository;
 import com.tsm.atelier.domain.client.ClientProfile;
 import com.tsm.atelier.domain.client.ClientProfileRepository;
-import com.tsm.atelier.domain.common.UserRegisteredEvent;
 import com.tsm.atelier.exception.BusinessException;
 import com.tsm.atelier.exception.EntityAlreadyExistsException;
 import com.tsm.atelier.factory.AuthTestFactory;
@@ -54,14 +51,12 @@ class AuthServiceTest {
   @Mock private UserRepository userRepository;
   @Mock private RefreshTokenRepository refreshTokenRepository;
   @Mock private ClientProfileRepository clientProfileRepository;
-  @Mock private EmailVerificationTokenRepository emailVerificationTokenRepository;
   @Mock private PasswordEncoder passwordEncoder;
   @Mock private ApplicationEventPublisher eventPublisher;
   @Mock private ApplicationProperties applicationProperties;
   @Mock private AuthenticationManager authenticationManager;
   @Mock private JwtService jwtService;
   @Mock private SecurityProperties securityProperties;
-  @Mock private UserVerificationService userVerificationService;
 
   @InjectMocks private AuthService authService;
 
@@ -83,8 +78,6 @@ class AuthServiceTest {
       when(userRepository.existsByEmail(request.email())).thenReturn(false);
       when(passwordEncoder.encode(request.password())).thenReturn("hashed_password");
       when(userRepository.save(any(User.class))).thenReturn(mockUser);
-      when(userVerificationService.createVerificationToken(mockUser))
-          .thenReturn("verification_token");
 
       // Act
       authService.register(request);
@@ -92,16 +85,14 @@ class AuthServiceTest {
       // Assert
       verify(userRepository).save(any(User.class));
       verify(clientProfileRepository).save(any(ClientProfile.class));
-      verify(userVerificationService).createVerificationToken(mockUser);
-      verify(eventPublisher).publishEvent(any(UserRegisteredEvent.class));
     }
 
     @Test
-    @DisplayName("Deve criar usuário com status INACTIVE")
-    void shouldCreateUserWithInactiveStatus() {
+    @DisplayName("Deve criar usuário com status ACTIVE")
+    void shouldCreateUserWithActiveStatus() {
       // Arrange
       RegisterRequestDTO request = AuthTestFactory.aRegisterRequest().build();
-      User mockUser = AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).build();
+      User mockUser = AuthTestFactory.aUser().withStatus(UserStatus.ACTIVE).build();
 
       when(userRepository.existsByEmail(any())).thenReturn(false);
       when(passwordEncoder.encode(any())).thenReturn("hashed_password");
@@ -111,7 +102,7 @@ class AuthServiceTest {
       authService.register(request);
 
       // Assert
-      verify(userRepository).save(argThat(user -> user.getStatus().equals(UserStatus.INACTIVE)));
+      verify(userRepository).save(argThat(user -> user.getStatus().equals(UserStatus.ACTIVE)));
     }
 
     @Test
@@ -261,45 +252,6 @@ class AuthServiceTest {
                           && token.getUser().equals(user)));
     }
 
-    @Test
-    @DisplayName(
-        "Deve disparar reenvio de e-mail quando login falha por conta desabilitada e SENHA CORRETA")
-    void shouldResendVerificationWhenLoginFailsDueToDisabledAccount() {
-      // Arrange
-      LoginRequestDTO request = AuthTestFactory.aLoginRequest().build();
-      User user = AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).build();
-
-      when(authenticationManager.authenticate(any()))
-          .thenThrow(new DisabledException("Conta inativa"));
-      when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(user));
-      when(passwordEncoder.matches(request.password(), user.getPassword())).thenReturn(true);
-
-      // Act & Assert
-      assertThatThrownBy(() -> authService.login(request)).isInstanceOf(DisabledException.class);
-
-      verify(userVerificationService).resendVerification(request.email());
-    }
-
-    @Test
-    @DisplayName(
-        "NÃO deve disparar reenvio de e-mail quando login falha por conta desabilitada mas SENHA INCORRETA")
-    void shouldNotResendVerificationWhenLoginFailsDueToDisabledAccountButWrongPassword() {
-      // Arrange
-      LoginRequestDTO request = AuthTestFactory.aLoginRequest().build();
-      User user = AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).build();
-
-      when(authenticationManager.authenticate(any()))
-          .thenThrow(new DisabledException("Conta inativa"));
-      when(userRepository.findByEmail(request.email())).thenReturn(Optional.of(user));
-      when(passwordEncoder.matches(request.password(), user.getPassword())).thenReturn(false);
-
-      // Act & Assert
-      assertThatThrownBy(() -> authService.login(request))
-          .isInstanceOf(BadCredentialsException.class)
-          .hasMessage("Email ou senha inválidos");
-
-      verify(userVerificationService, never()).resendVerification(any());
-    }
   }
 
   @Nested
@@ -406,98 +358,6 @@ class AuthServiceTest {
       assertThatThrownBy(() -> authService.refresh(new RefreshTokenRequestDTO("expired_token")))
           .isInstanceOf(BusinessException.class)
           .hasMessageContaining("inválido");
-    }
-  }
-
-  @Nested
-  @DisplayName("Verificação de email")
-  class VerifyEmail {
-
-    @Test
-    @DisplayName("Deve verificar email e ativar conta com sucesso")
-    void shouldVerifyEmailAndActivateAccountSuccessfully() {
-      // Arrange
-      User user =
-          AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).withEmailVerified(false).build();
-      EmailVerificationToken verificationToken =
-          AuthTestFactory.aVerificationToken().withUser(user).build();
-
-      when(emailVerificationTokenRepository.findByToken("valid_token"))
-          .thenReturn(Optional.of(verificationToken));
-
-      // Act
-      authService.verifyEmail("valid_token");
-
-      // Assert
-      assertThat(user.getStatus()).isEqualTo(UserStatus.ACTIVE);
-      assertThat(user.getEmailVerified()).isTrue();
-      verify(userRepository).save(user);
-    }
-
-    @Test
-    @DisplayName("Deve marcar token como usado após verificação")
-    void shouldMarkTokenAsUsedAfterVerification() {
-      // Arrange
-      User user = AuthTestFactory.aUser().withStatus(UserStatus.INACTIVE).build();
-      EmailVerificationToken verificationToken =
-          AuthTestFactory.aVerificationToken().withUser(user).build();
-
-      when(emailVerificationTokenRepository.findByToken(any()))
-          .thenReturn(Optional.of(verificationToken));
-
-      // Act
-      authService.verifyEmail("valid_token");
-
-      // Assert
-      assertThat(verificationToken.getUsed()).isTrue();
-      verify(emailVerificationTokenRepository).save(verificationToken);
-    }
-
-    @Test
-    @DisplayName("Deve lançar exceção quando token não existe")
-    void shouldThrowExceptionWhenTokenNotFound() {
-      // Arrange
-      when(emailVerificationTokenRepository.findByToken(any())).thenReturn(Optional.empty());
-
-      // Act & Assert
-      assertThatThrownBy(() -> authService.verifyEmail("invalid_token"))
-          .isInstanceOf(BusinessException.class)
-          .hasMessageContaining("inválido");
-
-      verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("Deve lançar exceção quando token já foi utilizado")
-    void shouldThrowExceptionWhenTokenAlreadyUsed() {
-      // Arrange
-      EmailVerificationToken usedToken = AuthTestFactory.aVerificationToken().used().build();
-
-      when(emailVerificationTokenRepository.findByToken(any())).thenReturn(Optional.of(usedToken));
-
-      // Act & Assert
-      assertThatThrownBy(() -> authService.verifyEmail("used_token"))
-          .isInstanceOf(BusinessException.class)
-          .hasMessageContaining("expirado ou já utilizado");
-
-      verify(userRepository, never()).save(any());
-    }
-
-    @Test
-    @DisplayName("Deve lançar exceção quando token está expirado")
-    void shouldThrowExceptionWhenTokenIsExpired() {
-      // Arrange
-      EmailVerificationToken expiredToken = AuthTestFactory.aVerificationToken().expired().build();
-
-      when(emailVerificationTokenRepository.findByToken(any()))
-          .thenReturn(Optional.of(expiredToken));
-
-      // Act & Assert
-      assertThatThrownBy(() -> authService.verifyEmail("expired_token"))
-          .isInstanceOf(BusinessException.class)
-          .hasMessageContaining("expirado ou já utilizado");
-
-      verify(userRepository, never()).save(any());
     }
   }
 

@@ -25,7 +25,6 @@ import com.tsm.atelier.factory.ProductTestFactory;
 import com.tsm.atelier.factory.ProductVariantTestFactory;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -34,7 +33,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 class ProductVariantServiceTest {
 
@@ -82,6 +80,9 @@ class ProductVariantServiceTest {
       Long colorId = 1L;
       ProductVariantRequestDTO request = new ProductVariantRequestDTO(ProductSize.M, 10);
 
+      ProductColor color = ProductColorTestFactory.aColor().withId(colorId).build();
+      when(productColorRepository.findByIdAndProductId(colorId, productId))
+          .thenReturn(Optional.of(color));
       when(productVariantRepository.existsByProductColorIdAndSize(colorId, request.size()))
           .thenReturn(true);
 
@@ -98,8 +99,6 @@ class ProductVariantServiceTest {
       Long colorId = 1L;
       ProductVariantRequestDTO request = new ProductVariantRequestDTO(ProductSize.M, 10);
 
-      when(productVariantRepository.existsByProductColorIdAndSize(colorId, request.size()))
-          .thenReturn(false);
       when(productColorRepository.findByIdAndProductId(colorId, productId))
           .thenReturn(Optional.empty());
 

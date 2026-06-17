@@ -4,5 +4,4 @@ public enum TargetAudience {
   MENSWEAR,
   WOMENSWEAR,
   UNISEX,
-  KIDS
 }
