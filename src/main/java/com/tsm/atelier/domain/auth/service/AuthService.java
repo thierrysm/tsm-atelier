@@ -1,5 +1,6 @@
 package com.tsm.atelier.domain.auth.service;
 
+import com.tsm.atelier.config.FeatureProperties;
 import com.tsm.atelier.config.SecurityProperties;
 import com.tsm.atelier.domain.auth.RefreshToken;
 import com.tsm.atelier.domain.auth.Role;
@@ -21,10 +22,7 @@ import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -45,6 +43,7 @@ public class AuthService {
   private final AuthenticationManager authenticationManager;
   private final SecurityProperties properties;
   private final ClientProfileRepository clientProfileRepository;
+  private final FeatureProperties featureProperties;
 
   @Transactional
   public void register(RegisterRequestDTO request) {
@@ -58,17 +57,17 @@ public class AuthService {
 
   @Transactional
   public AuthResponseDTO login(LoginRequestDTO request) {
-      Authentication authentication =
-          authenticationManager.authenticate(
-              new UsernamePasswordAuthenticationToken(request.email(), request.password()));
+    Authentication authentication =
+        authenticationManager.authenticate(
+            new UsernamePasswordAuthenticationToken(request.email(), request.password()));
 
-      User user = (User) authentication.getPrincipal();
+    User user = (User) authentication.getPrincipal();
 
-      assert user != null;
-      String accessToken = jwtService.generateAccessToken(user);
-      String refreshToken = saveRefreshToken(user, UUID.randomUUID());
+    assert user != null;
+    String accessToken = jwtService.generateAccessToken(user);
+    String refreshToken = saveRefreshToken(user, UUID.randomUUID());
 
-      return new AuthResponseDTO(accessToken, refreshToken);
+    return new AuthResponseDTO(accessToken, refreshToken);
   }
 
   @Transactional
@@ -106,13 +105,13 @@ public class AuthService {
   @Transactional
   public void logout(RefreshTokenRequestDTO request) {
     String hash = jwtService.hashRefreshToken(request.refreshToken());
-    RefreshToken refreshToken =
-        refreshTokenRepository
-            .findByTokenHash(hash)
-            .orElseThrow(() -> new BusinessException(GENERIC_REFRESH_ERROR));
-
-    refreshToken.setRevoked(true);
-    refreshTokenRepository.save(refreshToken);
+    refreshTokenRepository
+        .findByTokenHash(hash)
+        .ifPresent(
+            refreshToken -> {
+              refreshToken.setRevoked(true);
+              refreshTokenRepository.save(refreshToken);
+            });
   }
 
   private String saveRefreshToken(User user, UUID familyId) {
@@ -136,7 +135,7 @@ public class AuthService {
     user.setPassword(passwordEncoder.encode(request.password()));
     user.setRole(Role.CLIENT);
     user.setStatus(UserStatus.ACTIVE);
-    user.setEmailVerified(true);
+    user.setEmailVerified(!featureProperties.emailVerificationEnabled());
     return userRepository.save(user);
   }
 

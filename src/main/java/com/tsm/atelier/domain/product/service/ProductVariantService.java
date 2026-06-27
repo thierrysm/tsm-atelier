@@ -10,7 +10,6 @@ import com.tsm.atelier.domain.product.dto.v1.response.ProductVariantResponseDTO;
 import com.tsm.atelier.domain.product.mapper.ProductMapper;
 import com.tsm.atelier.domain.product.repository.ProductColorRepository;
 import com.tsm.atelier.domain.product.repository.ProductVariantRepository;
-import com.tsm.atelier.exception.BusinessException;
 import com.tsm.atelier.exception.EntityAlreadyExistsException;
 import com.tsm.atelier.exception.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;

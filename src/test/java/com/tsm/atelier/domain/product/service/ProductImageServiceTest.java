@@ -33,7 +33,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 class ProductImageServiceTest {
 

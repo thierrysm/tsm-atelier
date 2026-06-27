@@ -32,7 +32,6 @@ import com.tsm.atelier.factory.ProductTestFactory;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -45,7 +44,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.domain.SliceImpl;
 
-@Disabled
 @ExtendWith(MockitoExtension.class)
 @DisplayName("ProductService")
 class ProductServiceTest {
@@ -73,6 +71,7 @@ class ProductServiceTest {
       ProductDetailsResponseDTO expectedResponse = mock(ProductDetailsResponseDTO.class);
 
       when(productRepository.findByName(request.name())).thenReturn(Optional.empty());
+      when(productRepository.existsBySlug(any(String.class))).thenReturn(false);
       when(productMapper.toEntity(request)).thenReturn(product);
       when(collectionRepository.findById(request.collectionId()))
           .thenReturn(Optional.of(collection));
@@ -97,6 +96,7 @@ class ProductServiceTest {
       Collection collection = CollectionTestFactory.aCollection().build();
 
       when(productRepository.findByName(any())).thenReturn(Optional.empty());
+      when(productRepository.existsBySlug("vestido-linho-premium")).thenReturn(false);
       when(productMapper.toEntity(request)).thenReturn(product);
       when(collectionRepository.findById(any())).thenReturn(Optional.of(collection));
       when(productRepository.save(any())).thenReturn(product);
@@ -118,6 +118,7 @@ class ProductServiceTest {
       Product product = ProductTestFactory.aProduct().withoutCollection().build();
 
       when(productRepository.findByName(any())).thenReturn(Optional.empty());
+      when(productRepository.existsBySlug(any(String.class))).thenReturn(false);
       when(productMapper.toEntity(request)).thenReturn(product);
       when(productRepository.save(any())).thenReturn(product);
       when(productMapper.toDetailsResponse(any()))
@@ -190,6 +191,7 @@ class ProductServiceTest {
       Product product = ProductTestFactory.aProduct().build();
 
       when(productRepository.findByName(any())).thenReturn(Optional.empty());
+      when(productRepository.existsBySlug(any(String.class))).thenReturn(false);
       when(productMapper.toEntity(request)).thenReturn(product);
       when(collectionRepository.findById(any())).thenReturn(Optional.empty());
 
@@ -214,16 +216,19 @@ class ProductServiceTest {
       // Arrange
       Product product = ProductTestFactory.aProduct().withStatus(ProductStatus.DRAFT).build();
       ProductIntegrityDTO integrity = mock(ProductIntegrityDTO.class);
+      ProductDetailsResponseDTO expectedResponse = mock(ProductDetailsResponseDTO.class);
 
       when(productRepository.findById(1L)).thenReturn(Optional.of(product));
       when(productRepository.findIntegrityById(1L)).thenReturn(Optional.of(integrity));
       when(productRepository.save(any())).thenReturn(product);
+      when(productMapper.toDetailsResponse(product)).thenReturn(expectedResponse);
 
       // Act
-      productService.publish(1L);
+      ProductDetailsResponseDTO result = productService.publish(1L);
 
       // Assert
       assertThat(product.getStatus()).isEqualTo(ProductStatus.ACTIVE);
+      assertThat(result).isSameAs(expectedResponse);
       verify(productRepository).save(product);
       verify(productValidator).validateForPublication(integrity);
     }
@@ -282,6 +287,8 @@ class ProductServiceTest {
       when(productRepository.findById(1L)).thenReturn(Optional.of(product));
       when(productRepository.findIntegrityById(1L)).thenReturn(Optional.of(integrity));
       when(productRepository.save(any())).thenReturn(product);
+      when(productMapper.toDetailsResponse(any()))
+          .thenReturn(mock(ProductDetailsResponseDTO.class));
 
       // Act
       productService.publish(1L);
@@ -362,16 +369,19 @@ class ProductServiceTest {
     void shouldArchiveActiveProductSuccessfully() {
       // Arrange
       Product product = ProductTestFactory.aProduct().withStatus(ProductStatus.ACTIVE).build();
+      ProductDetailsResponseDTO expectedResponse = mock(ProductDetailsResponseDTO.class);
 
       when(productRepository.findById(1L)).thenReturn(Optional.of(product));
       when(productRepository.save(any())).thenReturn(product);
+      when(productMapper.toDetailsResponse(product)).thenReturn(expectedResponse);
 
       // Act
-      productService.archive(1L);
+      ProductDetailsResponseDTO result = productService.archive(1L);
 
       // Assert
       assertThat(product.getStatus()).isEqualTo(ProductStatus.ARCHIVED);
       assertThat(product.getDisabledAt()).isNotNull();
+      assertThat(result).isSameAs(expectedResponse);
       verify(productRepository).save(product);
     }
 
@@ -418,7 +428,7 @@ class ProductServiceTest {
           ProductTestFactory.aProduct().withName("Nome Antigo").withSlug("nome-antigo").build();
       ProductPatchDTO request =
           new ProductPatchDTO(
-              Optional.of("Nome"),
+              Optional.of("Nome Novo"),
               Optional.empty(),
               Optional.empty(),
               Optional.empty(),
@@ -429,6 +439,7 @@ class ProductServiceTest {
 
       when(productRepository.findById(1L)).thenReturn(Optional.of(product));
       when(productRepository.findByName("Nome Novo")).thenReturn(Optional.empty());
+      when(productRepository.existsBySlug("nome-novo")).thenReturn(false);
       when(productRepository.save(any())).thenReturn(product);
       when(productMapper.toDetailsResponse(any()))
           .thenReturn(mock(ProductDetailsResponseDTO.class));
@@ -449,7 +460,7 @@ class ProductServiceTest {
           ProductTestFactory.aProduct().withName("Mesmo Nome").withSlug("mesmo-nome").build();
       ProductPatchDTO request =
           new ProductPatchDTO(
-              Optional.of("Nome"),
+              Optional.of("Mesmo Nome"),
               Optional.empty(),
               Optional.empty(),
               Optional.empty(),
@@ -544,13 +555,14 @@ class ProductServiceTest {
     @DisplayName("Deve lançar exceção quando novo nome já pertence a outro produto")
     void shouldThrowWhenNewNameBelongsToAnotherProduct() {
       // Arrange
-      Product product = ProductTestFactory.aProduct().withId(1L).build();
+      Product product =
+          ProductTestFactory.aProduct().withId(1L).withName("Nome Antigo").build();
       Product anotherProduct =
           ProductTestFactory.aProduct().withId(2L).withName("Nome Existente").build();
 
       ProductPatchDTO request =
           new ProductPatchDTO(
-              Optional.of("Nome"),
+              Optional.of("Nome Existente"),
               Optional.empty(),
               Optional.empty(),
               Optional.empty(),
@@ -560,7 +572,8 @@ class ProductServiceTest {
               Optional.empty());
 
       when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-      when(productRepository.findByName("Nome Existente")).thenReturn(Optional.of(anotherProduct));
+      when(productRepository.findByName("Nome Existente"))
+          .thenReturn(Optional.of(anotherProduct));
 
       // Act & Assert
       assertThatThrownBy(() -> productService.partialUpdate(1L, request))
@@ -574,10 +587,11 @@ class ProductServiceTest {
     @DisplayName("Deve permitir atualizar para o mesmo nome do próprio produto")
     void shouldAllowUpdatingToSameProductName() {
       // Arrange
-      Product product = ProductTestFactory.aProduct().withId(1L).withName("Mesmo Nome").build();
+      Product product =
+          ProductTestFactory.aProduct().withId(1L).withName("Nome Original").build();
       ProductPatchDTO request =
           new ProductPatchDTO(
-              Optional.of("Nome"),
+              Optional.of("Nome Atualizado"),
               Optional.empty(),
               Optional.empty(),
               Optional.empty(),
@@ -587,8 +601,9 @@ class ProductServiceTest {
               Optional.empty());
 
       when(productRepository.findById(1L)).thenReturn(Optional.of(product));
-      when(productRepository.findByName("Outro Nome"))
-          .thenReturn(Optional.of(product)); // mesmo produto
+      when(productRepository.findByName("Nome Atualizado"))
+          .thenReturn(Optional.of(product)); // mesmo produto — deve ser permitido
+      when(productRepository.existsBySlug(any(String.class))).thenReturn(false);
       when(productRepository.save(any())).thenReturn(product);
       when(productMapper.toDetailsResponse(any()))
           .thenReturn(mock(ProductDetailsResponseDTO.class));

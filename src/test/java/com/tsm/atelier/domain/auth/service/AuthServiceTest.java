@@ -38,8 +38,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -57,6 +55,7 @@ class AuthServiceTest {
   @Mock private AuthenticationManager authenticationManager;
   @Mock private JwtService jwtService;
   @Mock private SecurityProperties securityProperties;
+  @Mock private com.tsm.atelier.config.FeatureProperties featureProperties;
 
   @InjectMocks private AuthService authService;
 
@@ -69,33 +68,15 @@ class AuthServiceTest {
   class RegisterUser {
 
     @Test
-    @DisplayName("Deve registrar usuário e publicar evento com sucesso")
-    void shouldRegisterUserAndPublishEventSuccessfully() {
-      // Arrange
-      RegisterRequestDTO request = AuthTestFactory.aRegisterRequest().build();
-      User mockUser = AuthTestFactory.aUser().withEmail(request.email()).build();
-
-      when(userRepository.existsByEmail(request.email())).thenReturn(false);
-      when(passwordEncoder.encode(request.password())).thenReturn("hashed_password");
-      when(userRepository.save(any(User.class))).thenReturn(mockUser);
-
-      // Act
-      authService.register(request);
-
-      // Assert
-      verify(userRepository).save(any(User.class));
-      verify(clientProfileRepository).save(any(ClientProfile.class));
-    }
-
-    @Test
-    @DisplayName("Deve criar usuário com status ACTIVE")
-    void shouldCreateUserWithActiveStatus() {
+    @DisplayName("Deve criar usuário com email verificado quando a feature está desabilitada")
+    void shouldCreateUserWithActiveStatusAndEmailVerified() {
       // Arrange
       RegisterRequestDTO request = AuthTestFactory.aRegisterRequest().build();
       User mockUser = AuthTestFactory.aUser().withStatus(UserStatus.ACTIVE).build();
 
       when(userRepository.existsByEmail(any())).thenReturn(false);
       when(passwordEncoder.encode(any())).thenReturn("hashed_password");
+      when(featureProperties.emailVerificationEnabled()).thenReturn(false);
       when(userRepository.save(any(User.class))).thenReturn(mockUser);
 
       // Act
@@ -103,6 +84,26 @@ class AuthServiceTest {
 
       // Assert
       verify(userRepository).save(argThat(user -> user.getStatus().equals(UserStatus.ACTIVE)));
+      verify(userRepository).save(argThat(user -> user.getEmailVerified().equals(true)));
+    }
+
+    @Test
+    @DisplayName("Deve criar usuário com email NÃO verificado quando a feature está habilitada")
+    void shouldCreateUserWithEmailNotVerifiedWhenFeatureEnabled() {
+      // Arrange
+      RegisterRequestDTO request = AuthTestFactory.aRegisterRequest().build();
+      User mockUser = AuthTestFactory.aUser().withStatus(UserStatus.ACTIVE).build();
+
+      when(userRepository.existsByEmail(any())).thenReturn(false);
+      when(passwordEncoder.encode(any())).thenReturn("hashed_password");
+      when(featureProperties.emailVerificationEnabled()).thenReturn(true);
+      when(userRepository.save(any(User.class))).thenReturn(mockUser);
+
+      // Act
+      authService.register(request);
+
+      // Assert
+      verify(userRepository).save(argThat(user -> user.getEmailVerified().equals(false)));
     }
 
     @Test
@@ -251,7 +252,6 @@ class AuthServiceTest {
                           && token.getFamilyId() != null
                           && token.getUser().equals(user)));
     }
-
   }
 
   @Nested
@@ -383,17 +383,16 @@ class AuthServiceTest {
     }
 
     @Test
-    @DisplayName("Deve lançar exceção quando refresh token não existe no logout")
-    void shouldThrowExceptionWhenRefreshTokenNotFoundOnLogout() {
+    @DisplayName("Deve ignorar silenciosamente quando refresh token não existe no logout")
+    void shouldIgnoreWhenRefreshTokenNotFoundOnLogout() {
       // Arrange
       when(jwtService.hashRefreshToken(any())).thenReturn("hash");
       when(refreshTokenRepository.findByTokenHash(any())).thenReturn(Optional.empty());
 
-      // Act & Assert
-      assertThatThrownBy(() -> authService.logout(new RefreshTokenRequestDTO("invalid_token")))
-          .isInstanceOf(BusinessException.class)
-          .hasMessageContaining("inválido");
+      // Act
+      authService.logout(new RefreshTokenRequestDTO("invalid_token"));
 
+      // Assert
       verify(refreshTokenRepository, never()).save(any());
     }
   }

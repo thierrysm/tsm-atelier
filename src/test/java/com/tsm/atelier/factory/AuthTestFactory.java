@@ -26,7 +26,6 @@ public class AuthTestFactory {
     return new RefreshTokenBuilder();
   }
 
-
   public static class LoginRequestBuilder {
     private String email = "ronaldinho@email.com";
     private String password = "password123";
@@ -160,6 +159,4 @@ public class AuthTestFactory {
       return refreshToken;
     }
   }
-
-
 }

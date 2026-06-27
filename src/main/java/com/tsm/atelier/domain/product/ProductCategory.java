@@ -27,46 +27,15 @@ public enum ProductCategory {
 
     ALLOWED_BY_AUDIENCE.put(
         TargetAudience.WOMENSWEAR,
-        EnumSet.of(
-            COAT,
-            T_SHIRT,
-            JACKET,
-            BLAZER,
-            DRESS,
-            BLOUSE,
-            SWEATSHIRT,
-            JEANS,
-            PANTS,
-            SHORTS
-        ));
+        EnumSet.of(COAT, T_SHIRT, JACKET, BLAZER, DRESS, BLOUSE, SWEATSHIRT, JEANS, PANTS, SHORTS));
 
     ALLOWED_BY_AUDIENCE.put(
         TargetAudience.MENSWEAR,
-        EnumSet.of(
-            COAT,
-            JACKET,
-            BLAZER,
-            SHIRT,
-            T_SHIRT,
-            SWEATSHIRT,
-            JEANS,
-            PANTS,
-            BERMUDA,
-            SUIT));
+        EnumSet.of(COAT, JACKET, BLAZER, SHIRT, T_SHIRT, SWEATSHIRT, JEANS, PANTS, BERMUDA, SUIT));
 
     ALLOWED_BY_AUDIENCE.put(
         TargetAudience.UNISEX,
-        EnumSet.of(
-            COAT,
-            JACKET,
-            BLAZER,
-            SHIRT,
-            T_SHIRT,
-            SWEATSHIRT,
-            JEANS,
-            PANTS
-        ));
-
+        EnumSet.of(COAT, JACKET, BLAZER, SHIRT, T_SHIRT, SWEATSHIRT, JEANS, PANTS));
   }
 
   public boolean isValidFor(TargetAudience audience) {

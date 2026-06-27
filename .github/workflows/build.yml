@@ -2,14 +2,14 @@ name: Build
 on:
   push:
     paths:
-      - 'src/**/*.kt'
+      - 'src/**/*.java'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
     branches:
       - main
   pull_request:
     paths:
-      - 'src/**/*.kt'
+      - 'src/**/*.java'
       - 'build.gradle.kts'
       - 'settings.gradle.kts'
   workflow_dispatch:
@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-java@v5.2.0
         with:
           distribution: 'temurin'
-          java-version: '25'
+          java-version: '21'
           cache: 'gradle'
       - name: Build
         run: ./gradlew build --no-daemon
